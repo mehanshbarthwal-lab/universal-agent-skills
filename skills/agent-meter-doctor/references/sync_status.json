@@ -1,0 +1,74 @@
+{
+  "Claude Code": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "/context",
+      "/usage",
+      "/skill-doctor",
+      "/insights"
+    ],
+    "checked_at": "2026-09-17T01:47:09.895669"
+  },
+  "Cursor": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "Dashboard Usage",
+      "Admin Events API",
+      "Linter Diagnostic Engine"
+    ],
+    "checked_at": "2026-09-17T01:47:10.551930"
+  },
+  "Windsurf": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "Cascade Memory",
+      "Quota Consumption Meter",
+      "AI Gateway Proxy"
+    ],
+    "checked_at": "2026-09-17T01:47:10.969698"
+  },
+  "Roo Code": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "AI Inference Summary",
+      "Usage Tracking JSON",
+      "Mode Context Budget"
+    ],
+    "checked_at": "2026-09-17T01:47:11.599878"
+  },
+  "Aider": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "/tokens",
+      "/lint",
+      "/test",
+      "Repo Map Budget"
+    ],
+    "checked_at": "2026-09-17T01:47:11.697931"
+  },
+  "Hermes Agent": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "hermes reflect",
+      "hermes doctor",
+      "state.db Telemetry"
+    ],
+    "checked_at": "2026-09-17T01:47:11.983196"
+  },
+  "OpenAI Codex": {
+    "status": "online",
+    "code": 200,
+    "meters_tracked": [
+      "Completion Usage Metadata",
+      "Tool Schema Registry",
+      "Prompt Cache Efficiency"
+    ],
+    "checked_at": "2026-09-17T01:47:12.052989"
+  }
+}
