@@ -75,6 +75,13 @@ The following items are original tools, skills, and architectures designed and a
 * Status: Original routing architecture by Mehansh Barthwal.
 * Purpose: Dynamically routes binary files, spreadsheets, presentations, and URLs to the optimal parsing engine between AnyDoc and MarkItDown.
 
+### Agent Meter Doctor
+* Category: Systems Architecture and Telemetry
+* Path: `skills/agent-meter-doctor/SKILL.md`
+* Status: Original engineering by Mehansh Barthwal. Universal agent telemetry framework bridging Claude Code four meters (/context, /usage, /skill-doctor, /insights) with multi agent observability and an autonomous post turn learning loop.
+* References and Attribution: Based on official Anthropic Claude Code documentation (`code.claude.com/docs/en/costs`, `code.claude.com/docs/en/commands`) and Implicator (`implicator.ai`) taxonomy on `/skill-doctor` and per turn context tax.
+* Purpose: Provides cross platform telemetry, prompt cache optimization, dead skill auditing, and records prevention rules into a persistent mistake ledger.
+
 ---
 
 ## 2. Adapted and Upstream Open Source Works
@@ -146,6 +153,12 @@ The following packages represent adapted or integrated open source projects. Ori
 * Upstream Repository: `https://github.com/microsoft/markitdown`
 * License: MIT License (Copyright Microsoft Corporation)
 * Relationship: Python utility converting office documents, PDFs, audio, and archives into Markdown.
+
+### Beautify GitHub Profile
+* Original Author: Reza Shakeri
+* Upstream Repository: `https://github.com/rzashakeri/beautify-github-profile`
+* License: MIT License (Copyright 2024 Reza Shakeri)
+* Relationship: Adapted into repository documentation standard with local mirror, badge catalog, and layout templates.
 
 ---
 

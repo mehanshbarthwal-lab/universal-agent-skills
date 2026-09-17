@@ -6,9 +6,9 @@
 
 <p>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-success.svg?style=for-the-badge" alt="License MIT" /></a>
-  <a href="#skill-catalog"><img src="https://img.shields.io/badge/Suites-33%20Cataloged-blue.svg?style=for-the-badge" alt="Suites 33 Cataloged" /></a>
-  <a href="#authorship-and-attribution"><img src="https://img.shields.io/badge/Original%20Works-14-orange.svg?style=for-the-badge" alt="Original Works 14" /></a>
-  <a href="#authorship-and-attribution"><img src="https://img.shields.io/badge/Community%20Upstream-17-purple.svg?style=for-the-badge" alt="Community Upstream 17" /></a>
+  <a href="#skill-catalog"><img src="https://img.shields.io/badge/Suites-35%20Cataloged-blue.svg?style=for-the-badge" alt="Suites 35 Cataloged" /></a>
+  <a href="#authorship-and-attribution"><img src="https://img.shields.io/badge/Original%20Works-15-orange.svg?style=for-the-badge" alt="Original Works 15" /></a>
+  <a href="#authorship-and-attribution"><img src="https://img.shields.io/badge/Community%20Upstream-18-purple.svg?style=for-the-badge" alt="Community Upstream 18" /></a>
   <a href="https://universal-agent-skills.vercel.app"><img src="https://img.shields.io/badge/Showcase-Live%20Portal-emerald.svg?style=for-the-badge" alt="Live Showcase" /></a>
 </p>
 
@@ -78,6 +78,7 @@ This repository places high value on open source transparency and honest provena
 * **Locality Delivery Scraper**: End to end scraping playbook for mapping locality food delivery and grocery markets.
 * **IPYNB Editor**: Programmatic Jupyter Notebook cell inspection and patching utility preserving JSON schema integrity.
 * **Markdown Converter Router**: Dynamic architectural router directing documents across AnyDoc and MarkItDown.
+* **Agent Meter Doctor**: Universal agent telemetry, token waste auditing, and autonomous post turn learning loop bridging Claude Code four meters across multi agent environments.
 
 ### Adapted Open Source Projects
 
@@ -93,6 +94,7 @@ This repository places high value on open source transparency and honest provena
 * **Ralph**: Authored by snarktank (MIT License). Autonomous PRD conversion and implementation system.
 * **SkillOpt**: Developed by Microsoft Corporation (MIT License). Agent self optimization and offline memory consolidation loop.
 * **MarkItDown**: Utility by Microsoft Corporation (MIT License). Python library for multi format document extraction.
+* **Beautify GitHub Profile**: Authored by Reza Shakeri (MIT License). Publication grade repository README documentation standard with badge templates and visual showcases.
 
 ### Methodology Inspirations
 
@@ -200,6 +202,8 @@ Refer to [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) for full license notices, upstream
 | Skill | Category | Provenance | Description | Source |
 | :--- | :--- | :--- | :--- | :--- |
 | **Graphify** | Architecture | Adapted Open Source | Constructs queryable knowledge graphs from codebases and documents | [`skills/graphify`](skills/graphify) |
+| **Agent Meter Doctor** | Architecture | Original by Mehansh | Universal agent telemetry, token waste auditing, and post turn reflection loop | [`skills/agent-meter-doctor`](skills/agent-meter-doctor) |
+| **Beautify GitHub Profile** | Architecture | Adapted Open Source | Elite repository README documentation standard with badge templates and visual showcase components | [`skills/beautify-github-profile`](skills/beautify-github-profile) |
 | **Karpathy Guidelines** | Architecture | Methodology Inspired | Instinctual behavioral rules for disciplined agentic coding | [`skills/karpathy-guidelines`](skills/karpathy-guidelines) |
 | **Knowledge Base** | Architecture | Internal Reference | Internal operational runbook and deployment troubleshooting reference | [`skills/knowledge-base`](skills/knowledge-base) |
 | **Zapier MCP** | Architecture | Internal Reference | Model Context Protocol integration guidelines for external tools | [`skills/zapier-mcp`](skills/zapier-mcp) |

@@ -123,3 +123,14 @@ Perform this five step sequence weekly inside an active working session:
 * Extended Thinking: Billed as output tokens and active by default. Adjust down with `/effort` or `/model` for straightforward tasks.
 * Multi Agent Teams: Agent teams consume approximately 7x the tokens of a standard session because every teammate runs an independent context window. Keep agent teams lean and terminate teammates immediately upon task completion.
 * Model Tier Selection: Sonnet handles most engineering tasks efficiently; leaving Opus as the default selection is the primary driver of excessive API spend.
+
+## Sources and Attribution
+
+* Anthropic Claude Code Documentation:
+  * Official changelog and version history covering v2.1.257 through v2.1.266 (September 2026): `https://code.claude.com/docs/en/changelog`
+  * Cost management guide, prompt caching diagnostics, and attribution: `https://code.claude.com/docs/en/costs`
+  * Commands reference covering `/context`, `/cost` alias, `/compact`, and `/effort`: `https://code.claude.com/docs/en/commands`
+* Implicator (`https://implicator.ai`):
+  * Analysis of `/skill-doctor` shipped in v2.1.261 and per turn context tax calculations (September 2026).
+  * Synthesis of the Four Meters concept and the five minute weekly maintenance routine.
+

@@ -8,7 +8,7 @@
       "/skill-doctor",
       "/insights"
     ],
-    "checked_at": "2026-09-17T01:47:09.895669"
+    "checked_at": "2026-09-17T02:10:45.203153"
   },
   "Cursor": {
     "status": "online",
@@ -18,7 +18,7 @@
       "Admin Events API",
       "Linter Diagnostic Engine"
     ],
-    "checked_at": "2026-09-17T01:47:10.551930"
+    "checked_at": "2026-09-17T02:10:45.406927"
   },
   "Windsurf": {
     "status": "online",
@@ -28,7 +28,7 @@
       "Quota Consumption Meter",
       "AI Gateway Proxy"
     ],
-    "checked_at": "2026-09-17T01:47:10.969698"
+    "checked_at": "2026-09-17T02:10:45.831509"
   },
   "Roo Code": {
     "status": "online",
@@ -38,7 +38,7 @@
       "Usage Tracking JSON",
       "Mode Context Budget"
     ],
-    "checked_at": "2026-09-17T01:47:11.599878"
+    "checked_at": "2026-09-17T02:10:46.444927"
   },
   "Aider": {
     "status": "online",
@@ -49,7 +49,7 @@
       "/test",
       "Repo Map Budget"
     ],
-    "checked_at": "2026-09-17T01:47:11.697931"
+    "checked_at": "2026-09-17T02:10:47.329963"
   },
   "Hermes Agent": {
     "status": "online",
@@ -59,7 +59,7 @@
       "hermes doctor",
       "state.db Telemetry"
     ],
-    "checked_at": "2026-09-17T01:47:11.983196"
+    "checked_at": "2026-09-17T02:10:47.629749"
   },
   "OpenAI Codex": {
     "status": "online",
@@ -69,6 +69,6 @@
       "Tool Schema Registry",
       "Prompt Cache Efficiency"
     ],
-    "checked_at": "2026-09-17T01:47:12.052989"
+    "checked_at": "2026-09-17T02:10:47.909016"
   }
 }

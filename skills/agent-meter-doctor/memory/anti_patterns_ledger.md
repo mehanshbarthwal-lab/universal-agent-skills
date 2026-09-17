@@ -70,3 +70,13 @@ Each entry in this ledger adheres to the following specification:
 * Detection Signal: User feedback indicating the delivered solution answered the wrong problem.
 * Strict Prevention Rule: If a requirement has multiple viable interpretations, state assumptions explicitly or present a structured choice before writing code.
 * Efficiency Gain: Avoids complete rewrites saving 30,000 to 100,000 tokens per task.
+
+### Entry AP007: Shell Script Expansion and Log Encoding Collisions
+* Category: Buggy Code and Tool Loop
+* Detected Date: 2026-09-17
+* Failure Mode: Emitting scripts using double quoted here strings that prematurely expand variables into empty strings, or writing logs with default PowerShell encodings causing UTF 16 collisions.
+* Root Cause: PowerShell double quoted here strings expand internal variables during file generation, and default Out File produces UTF 16LE while Python appends in UTF 8.
+* Detection Signal: Script failure due to blank commands, or file inspection errors reporting invalid byte sequences.
+* Strict Prevention Rule: Always use single quoted here strings when generating scripts containing shell variables, and always pass explicit UTF 8 encoding parameters to all file writing commands.
+* Efficiency Gain: Prevents broken background tasks and logging corruption saving 15,000 tokens in debugging loops.
+

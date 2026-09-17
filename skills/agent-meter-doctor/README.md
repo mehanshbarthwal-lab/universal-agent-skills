@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # Agent Meter Doctor
 
@@ -179,3 +179,11 @@ agent-meter-doctor/
 ├── README.md                     # High end documentation standard
 └── SKILL.md                      # Root skill specification and triggers
 ```
+
+---
+
+## Citations and References
+
+* **Anthropic Documentation**: Official specifications and changelogs for Claude Code (`code.claude.com/docs/en/costs`, `code.claude.com/docs/en/commands`, `code.claude.com/docs/en/changelog`).
+* **Implicator**: Industry analysis and architectural breakdown of `/skill-doctor` and context token tax (`implicator.ai`, September 2026).
+

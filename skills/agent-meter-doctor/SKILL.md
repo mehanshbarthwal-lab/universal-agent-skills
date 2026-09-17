@@ -1,4 +1,4 @@
-﻿---
+---
 name: agent-meter-doctor
 description: "Universal AI Agent Telemetry, Token Waste Auditing, Buggy Code Diagnostics, and Autonomous Self Improvement Loop. Bridges Claude Code four meters (/context, /usage, /skill-doctor, /insights) with universal telemetry across all AI agents (Antigravity, Cursor, Windsurf, Roo Code, Aider, Hermes). Enforces an automatic post turn reflection loop after every prompt to identify token waste, code defects, and unused skill components, recording hard prevention rules into a persistent anti pattern ledger."
 ---
@@ -122,3 +122,9 @@ Every agent must execute this lightweight self audit at the conclusion of every 
 * `ponytail`: Prevents speculative abstractions and eliminates dead code, keeping context lean.
 * `knowledge_base.md`: Consults historical deployment and debugging knowledge before attempting complex fixes.
 * `stop-slop`: Removes verbose AI writing patterns from explanations, reducing output token consumption.
+
+## Part 6: References and Attribution
+
+* Anthropic Claude Code Documentation: Official specifications for `/context`, `/usage`, `/skill-doctor`, `/insights`, and prompt caching (`code.claude.com/docs/en/costs`, `code.claude.com/docs/en/commands`, `code.claude.com/docs/en/changelog`).
+* Implicator (`implicator.ai`): Original industry analysis and breakdown of `/skill-doctor` and the four meters taxonomy (September 2026).
+
