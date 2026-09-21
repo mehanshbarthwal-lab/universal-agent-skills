@@ -1,0 +1,14 @@
+# Environment variables
+.env
+*.env.local
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Temporary logs and debug files
+debug_*
+test_*
+tmp_*

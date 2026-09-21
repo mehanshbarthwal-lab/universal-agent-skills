@@ -126,35 +126,43 @@ Documented mistakes are stored in `memory/anti_patterns_ledger.md` with explicit
 
 ### Prerequisites
 * Python 3.10 or later
-* Access to `<skills-directory>`
+* Access to `F:\Agent Skills`
 
 ### 1. Audit Current Session
 Analyze an active conversation transcript to discover token waste, failed tools, and dead skills:
 ```bash
-python "<skills-directory>/agent-meter-doctor/scripts\audit_session.py" "<path_to_transcript.jsonl>"
+python scripts/audit_session.py "<path_to_transcript.jsonl>"
+
+# With TypeSafe Jev semantic friction and dormant skill classification
+python scripts/audit_session.py "<path_to_transcript.jsonl>" --use-jev
 ```
 
-### 2. Search Documented Anti Patterns
+### 2. Prune Inactive Tool Context
+Evaluate tool calls against the final response to safely prune redundant calls from context:
+```bash
+python scripts/prune_session.py "<path_to_transcript.jsonl>"
+```
+
+### 3. Search Documented Anti Patterns
 Query the persistent mistake ledger before executing high risk changes:
 ```bash
-python "<skills-directory>/agent-meter-doctor/scripts\reflect_and_learn.py" search "cache"
+python scripts/reflect_and_learn.py search "cache invalidation"
 ```
 
-### 3. Log a Discovered Mistake
-Record an error or tool failure so no agent repeats it:
+### 4. Log a Discovered Mistake
+Record an error or tool failure with automatic category classification and deduplication:
 ```bash
-python "<skills-directory>/agent-meter-doctor/scripts\reflect_and_learn.py" log \
-  --category "Buggy Code" \
+python scripts/reflect_and_learn.py log \
   --title "Unverified Regex Replacement" \
   --failure "Applied global regex without line boundaries causing syntax errors" \
   --cause "Omitted unit test execution prior to returning" \
   --rule "Always run python test suite after modifying string parsers"
 ```
 
-### 4. Synchronize Telemetry with Upstream Docs
+### 5. Synchronize Telemetry with Upstream Docs
 Audit and update telemetry endpoints against official agent releases:
 ```bash
-python "<skills-directory>/agent-meter-doctor/scripts\sync_agent_telemetry.py"
+python scripts/sync_agent_telemetry.py
 ```
 
 ---
@@ -173,8 +181,13 @@ agent-meter-doctor/
 │   └── universal_telemetry.md    # Multi agent telemetry and observability guide
 ├── scripts/
 │   ├── audit_session.py          # Session log parser and health auditor
+│   ├── jev_definitions.py        # TypeSafe Jev prompt instructions and thresholds
+│   ├── jev_service.py            # Jev System One client and fallback wrapper
+│   ├── prune_session.py          # Context aware tool call pruning CLI
 │   ├── reflect_and_learn.py      # Post turn reflection and ledger CLI
 │   └── sync_agent_telemetry.py   # Upstream documentation synchronizer
+├── .env.example                  # Environment configuration template
+├── .gitignore                    # Local secrets and cache exclusions
 ├── AGENT_USAGE.md                # Agent operational guide
 ├── README.md                     # High end documentation standard
 └── SKILL.md                      # Root skill specification and triggers

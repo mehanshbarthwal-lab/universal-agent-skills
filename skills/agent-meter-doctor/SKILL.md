@@ -106,16 +106,27 @@ Every agent must execute this lightweight self audit at the conclusion of every 
 
 ### Learning and Ledger Action
 * If a bug, failed tool call, cache busting event, or user correction occurred, extract the root cause immediately.
-* Record the entry into `<skills-directory>/agent-meter-doctor/memory\anti_patterns_ledger.md` using `scripts/reflect_and_learn.py`.
+* Record the entry into `F:\Agent Skills\agent-meter-doctor\memory\anti_patterns_ledger.md` using `scripts/reflect_and_learn.py`.
 * Ensure that future prompts check this ledger so the mistake is never repeated.
 
-## Part 4: Automated Documentation and Telemetry Synchronization
+## Part 4: TypeSafe Jev System One Semantic Judgments
+
+TypeSafe AI Jev provides fast System One decisions (Noul probabilities, Choice selection, Score ratings) without generative overhead.
+
+### Capabilities and Usage
+1. Semantic Friction Auditing: Run `python scripts/audit_session.py <logfile> --use-jev` to detect user pushbacks, stealth tool errors with non ERROR status, and redundant tool calls.
+2. Dormant Skill Classification: Automatically separates skills that were rightly idle from skills that matched the session tasks and should have triggered.
+3. Ledger Re ranking and Deduplication: Run `python scripts/reflect_and_learn.py search "<task>"` for semantic relevance scores. When logging new entries, Jev maps failures to the five standard categories and blocks duplicate entries.
+4. Session Context Pruning: Run `python scripts/prune_session.py <logfile>` to identify tool calls whose outputs did not contribute to the final response, calculating reclaimable context tokens.
+5. Configuration and Fallback: Set `TYPESAFE_API_KEY` in `.env`. When the key is unset, all scripts gracefully fall back to default deterministic heuristics.
+
+## Part 5: Automated Documentation and Telemetry Synchronization
 
 * Periodic Sync: As agent platforms evolve, telemetry formats and CLI meters change.
-* Automated Synchronizer: Run `scripts/sync_agent_telemetry.py` or trigger the monthly update script in `<skills-directory>/bin/update-skills.ps1`.
+* Automated Synchronizer: Run `scripts/sync_agent_telemetry.py` or trigger the monthly update script in `F:\Agent Skills\bin\update-skills.ps1`.
 * Upstream Tracking: Automatically monitors changelogs and release endpoints for Claude Code, Antigravity, Cursor, Windsurf, Roo Code, Aider, OpenAI Codex, and Hermes Agent.
 
-## Part 5: Cross Skill Integration Matrix
+## Part 6: Cross Skill Integration Matrix
 
 * `SkillOpt`: Feeds recurring entries from `anti_patterns_ledger.md` into the nightly optimization cycle to refine existing skills.
 * `karpathy-guidelines`: Enforces surgical diffs and thinking before coding, preventing bug driven token burn.
@@ -123,8 +134,9 @@ Every agent must execute this lightweight self audit at the conclusion of every 
 * `knowledge_base.md`: Consults historical deployment and debugging knowledge before attempting complex fixes.
 * `stop-slop`: Removes verbose AI writing patterns from explanations, reducing output token consumption.
 
-## Part 6: References and Attribution
+## Part 7: References and Attribution
 
+* TypeSafe AI Documentation: Official specifications for Jev System One model, Noul, Choice, and Score primitives (`docs.typesafe.ai`).
 * Anthropic Claude Code Documentation: Official specifications for `/context`, `/usage`, `/skill-doctor`, `/insights`, and prompt caching (`code.claude.com/docs/en/costs`, `code.claude.com/docs/en/commands`, `code.claude.com/docs/en/changelog`).
 * Implicator (`implicator.ai`): Original industry analysis and breakdown of `/skill-doctor` and the four meters taxonomy (September 2026).
 

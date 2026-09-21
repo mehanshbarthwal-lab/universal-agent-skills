@@ -23,7 +23,9 @@ import sys
 import urllib.request
 from pathlib import Path
 
-LOG_FILE = Path("F:/Agent Skills/agent-meter-doctor/telemetry_sync.log")
+# Base directory of agent-meter-doctor skill
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_FILE = BASE_DIR / "telemetry_sync.log"
 
 ENDPOINTS = [
     {
@@ -105,7 +107,7 @@ def sync_telemetry():
             }
             log(f"Notice: Offline or rate limited for {agent_name}: {e}. Retaining cached telemetry signatures.")
 
-    status_file = Path("F:/Agent Skills/agent-meter-doctor/references/sync_status.json")
+    status_file = BASE_DIR / "references" / "sync_status.json"
     try:
         with open(status_file, "w", encoding="utf-8") as f:
             json.dump(sync_results, f, indent=2)
@@ -117,7 +119,7 @@ def sync_telemetry():
     log("Automated AI agent telemetry sync and monthly maintenance completed.")
 
 def consolidate_memory_ledger():
-    ledger_path = Path("F:/Agent Skills/agent-meter-doctor/memory/anti_patterns_ledger.md")
+    ledger_path = BASE_DIR / "memory" / "anti_patterns_ledger.md"
     if not ledger_path.exists():
         log("Notice: Anti patterns ledger not found during consolidation.")
         return

@@ -133,4 +133,3 @@ Perform this five step sequence weekly inside an active working session:
 * Implicator (`https://implicator.ai`):
   * Analysis of `/skill-doctor` shipped in v2.1.261 and per turn context tax calculations (September 2026).
   * Synthesis of the Four Meters concept and the five minute weekly maintenance routine.
-

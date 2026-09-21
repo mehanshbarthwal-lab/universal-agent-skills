@@ -230,7 +230,7 @@ This repository places high value on open source transparency and honest provena
 * **Locality Delivery Scraper**: End to end scraping playbook for mapping locality food delivery and grocery markets.
 * **IPYNB Editor**: Programmatic Jupyter Notebook cell inspection and patching utility preserving JSON schema integrity.
 * **Markdown Converter Router**: Dynamic architectural router directing documents across AnyDoc and MarkItDown.
-* **Agent Meter Doctor**: Universal agent telemetry, token waste auditing, and autonomous post turn learning loop bridging Claude Code four meters across multi agent environments.
+* **Agent Meter Doctor**: Universal agent telemetry, token waste auditing, TypeSafe Jev System One semantic friction diagnostics, dormant skill classification, and session context pruning paired with an autonomous post turn learning loop.
 
 ### Adapted Open Source Projects
 

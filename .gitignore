@@ -44,6 +44,9 @@ dist-ssr
 credentials.env
 *.pem
 *.key
+.env*
+!.env.example
+!**/.env.example
 
 # Python caches and build output
 __pycache__/
@@ -60,7 +63,6 @@ lib/
 lib64/
 parts/
 sdist/
-var/
 wheels/
 *.egg-info/
 .installed.cfg
@@ -72,5 +74,3 @@ wheels/
 htmlcov/
 
 graphify-out/
-
-
