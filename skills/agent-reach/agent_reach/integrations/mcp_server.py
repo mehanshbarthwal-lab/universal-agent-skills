@@ -19,7 +19,7 @@ from agent_reach.utils.text import scrub_url_credentials
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import TextContent, Tool
+    from mcp.types import TextContent, Tool, ToolAnnotations
 
     HAS_MCP = True
 except ImportError:
@@ -38,9 +38,17 @@ def create_server():
     @server.list_tools()
     async def list_tools():
         return [
-            Tool(name="get_status",
-                 description="Get Agent Reach status: which channels are installed and active.",
-                 inputSchema={"type": "object", "properties": {}}),
+            Tool(
+                name="get_status",
+                description="Get Agent Reach status: which channels are installed and active.",
+                inputSchema={"type": "object", "properties": {}},
+                annotations=ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
+            ),
         ]
 
     @server.call_tool()

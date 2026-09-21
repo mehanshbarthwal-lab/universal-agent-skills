@@ -361,3 +361,176 @@ def test_cli_api_key_from_env(monkeypatch):
     monkeypatch.setattr(serve_mod, "serve_http", lambda gp, **k: captured.update(**k))
     serve_mod._main(["g.json", "--transport", "http"])
     assert captured["api_key"] == "from-env"
+
+
+def test_pr_tools_annotations_and_descriptions(tmp_path):
+    """The three PR tools have explicit boolean annotations and descriptions."""
+    app = serve_mod._build_http_app(_graph_file(tmp_path), json_response=True)
+    with _client(app) as client:
+        headers = _init_session(client)
+        resp = client.post(
+            "/mcp",
+            headers=headers,
+            json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        )
+        assert resp.status_code == 200
+        tools = {t["name"]: t for t in resp.json()["result"]["tools"]}
+
+        for name in ("list_prs", "get_pr_impact", "triage_prs"):
+            assert name in tools, f"tool {name} missing from tools/list"
+            tool = tools[name]
+            assert tool["description"], f"{name} description must not be empty"
+            ann = tool.get("annotations")
+            assert ann is not None, f"{name} must have annotations"
+            assert ann.get("readOnlyHint") is True
+            assert ann.get("destructiveHint") is False
+            assert ann.get("idempotentHint") is True
+            assert ann.get("openWorldHint") is True
+
+
+def test_tool_list_prs_execution(tmp_path, monkeypatch):
+    """list_prs validates input and formats PR output correctly."""
+    from datetime import datetime, timezone
+    from graphify.prs import PRInfo
+    import graphify.prs as prs_mod
+
+    app = serve_mod._build_http_app(_graph_file(tmp_path), json_response=True)
+    with _client(app) as client:
+        headers = _init_session(client)
+
+        # 1. Invalid repo format rejected
+        err = _call_tool(client, headers, "list_prs", {"repo": "invalid..repo;rm"}, rid=10)
+        assert "Error: Invalid repository format" in err
+
+        # 2. Invalid base branch format rejected
+        err_base = _call_tool(client, headers, "list_prs", {"base": "-bad-flag"}, rid=11)
+        assert "Error: Invalid base branch format" in err_base
+
+        # 3. Successful fetch with mock PRs
+        mock_pr = PRInfo(
+            number=42,
+            title="Feature workflow enhancement",
+            branch="feat/workflow",
+            base_branch="main",
+            author="alice",
+            is_draft=False,
+            review_decision="APPROVED",
+            ci_status="SUCCESS",
+            updated_at=datetime.now(timezone.utc),
+            expected_base="main",
+        )
+        monkeypatch.setattr(prs_mod, "fetch_prs", lambda repo=None, base="main": [mock_pr])
+        monkeypatch.setattr(prs_mod, "fetch_worktrees", lambda: {})
+
+        res = _call_tool(client, headers, "list_prs", {"repo": "owner/repo", "base": "main"}, rid=12)
+        assert "#42" in res
+        assert "Feature workflow enhancement" in res
+        assert "alice" in res
+
+        # 4. Successful fetch when no base is passed (falls back to _detect_default_branch)
+        detected_base = []
+        monkeypatch.setattr(
+            prs_mod,
+            "_detect_default_branch",
+            lambda repo=None: detected_base.append(repo) or "main",
+        )
+        res_no_base = _call_tool(client, headers, "list_prs", {"repo": "owner/repo"}, rid=13)
+        assert "#42" in res_no_base
+        assert detected_base == ["owner/repo"]
+
+
+
+def test_tool_get_pr_impact_execution(tmp_path, monkeypatch):
+    """get_pr_impact validates inputs and computes impact metrics."""
+    import graphify.prs as prs_mod
+
+    app = serve_mod._build_http_app(_graph_file(tmp_path), json_response=True)
+    with _client(app) as client:
+        headers = _init_session(client)
+
+        # 1. Negative or zero pr_number rejected
+        err_num = _call_tool(client, headers, "get_pr_impact", {"pr_number": 0}, rid=20)
+        assert "Error: pr_number must be a positive integer." in err_num
+
+        # 2. Invalid repo format rejected
+        err_repo = _call_tool(client, headers, "get_pr_impact", {"pr_number": 1, "repo": "bad repo"}, rid=21)
+        assert "Error: Invalid repository format" in err_repo
+
+        # 3. Not found / unauthenticated
+        monkeypatch.setattr(prs_mod, "_gh", lambda *args: None)
+        not_found = _call_tool(client, headers, "get_pr_impact", {"pr_number": 999}, rid=22)
+        assert "PR #999 not found or gh not authenticated." in not_found
+
+        # 4. Successful impact calculation
+        mock_view = {
+            "title": "Update core module",
+            "headRefName": "feat/core",
+            "baseRefName": "main",
+            "author": {"login": "bob"},
+            "isDraft": False,
+            "reviewDecision": "APPROVED",
+            "statusCheckRollup": [],
+            "updatedAt": "2026-03-01T00:00:00Z",
+        }
+        monkeypatch.setattr(prs_mod, "_gh", lambda *args: mock_view)
+        monkeypatch.setattr(prs_mod, "fetch_pr_files", lambda number, repo=None: ["a.py", "b.py"])
+
+        res = _call_tool(client, headers, "get_pr_impact", {"pr_number": 10}, rid=23)
+        assert "PR #10: Update core module" in res
+        assert "Graph impact:" in res
+        assert "Files changed (2):" in res
+
+
+def test_tool_triage_prs_execution(tmp_path, monkeypatch):
+    """triage_prs validates inputs and ranks actionable PRs."""
+    from datetime import datetime, timezone
+    from graphify.prs import PRInfo
+    import graphify.prs as prs_mod
+
+    app = serve_mod._build_http_app(_graph_file(tmp_path), json_response=True)
+    with _client(app) as client:
+        headers = _init_session(client)
+
+        # 1. Invalid repo format rejected
+        err = _call_tool(client, headers, "triage_prs", {"repo": "evil/repo;id"}, rid=30)
+        assert "Error: Invalid repository format" in err
+
+        # 2. No actionable PRs
+        monkeypatch.setattr(prs_mod, "fetch_prs", lambda repo=None, base="main": [])
+        monkeypatch.setattr(prs_mod, "fetch_worktrees", lambda: {})
+        empty = _call_tool(client, headers, "triage_prs", {"base": "main"}, rid=31)
+        assert "No actionable PRs targeting main." in empty
+
+        # 3. Actionable PRs ranked
+        actionable_pr = PRInfo(
+            number=77,
+            title="Refactor query router",
+            branch="refactor/router",
+            base_branch="main",
+            author="carol",
+            is_draft=False,
+            review_decision="APPROVED",
+            ci_status="SUCCESS",
+            updated_at=datetime.now(timezone.utc),
+            expected_base="main",
+        )
+        monkeypatch.setattr(prs_mod, "fetch_prs", lambda repo=None, base="main": [actionable_pr])
+        monkeypatch.setattr(prs_mod, "fetch_pr_files", lambda number, repo=None: ["router.py"])
+
+        res = _call_tool(client, headers, "triage_prs", {"base": "main"}, rid=32)
+        assert "Actionable PRs targeting main: 1" in res
+        assert "PR #77" in res
+        assert "carol" in res
+
+        # 4. Triage when no base is passed (falls back to _detect_default_branch)
+        detected_triage_base = []
+        monkeypatch.setattr(
+            prs_mod,
+            "_detect_default_branch",
+            lambda repo=None: detected_triage_base.append(repo) or "main",
+        )
+        res_no_base = _call_tool(client, headers, "triage_prs", {"repo": "owner/repo"}, rid=33)
+        assert "Actionable PRs targeting main: 1" in res_no_base
+        assert detected_triage_base == ["owner/repo"]
+
+

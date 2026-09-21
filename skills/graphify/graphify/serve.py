@@ -1364,6 +1364,12 @@ def _build_server(graph_path: str):
                     },
                     "required": ["question"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="get_node",
@@ -1373,6 +1379,12 @@ def _build_server(graph_path: str):
                     "properties": {"label": {"type": "string", "description": "Node label or ID to look up"}},
                     "required": ["label"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="get_neighbors",
@@ -1386,6 +1398,12 @@ def _build_server(graph_path: str):
                     },
                     "required": ["label"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="get_community",
@@ -1398,16 +1416,34 @@ def _build_server(graph_path: str):
                     },
                     "required": ["community_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="god_nodes",
                 description="Return the most connected nodes - the core abstractions of the knowledge graph.",
                 inputSchema={"type": "object", "properties": {"top_n": {"type": "integer", "default": 10}}},
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="graph_stats",
                 description="Return summary statistics: node count, edge count, communities, confidence breakdown.",
                 inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="shortest_path",
@@ -1421,14 +1457,16 @@ def _build_server(graph_path: str):
                     },
                     "required": ["source", "target"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=False,
+                ),
             ),
             types.Tool(
                 name="list_prs",
-                description=(
-                    "List open GitHub PRs with CI status, review state, and graph impact "
-                    "(which communities each PR touches, blast radius). Use this before starting "
-                    "work to check if a PR already covers the area you're about to change."
-                ),
+                description="List open GitHub pull requests for an optional target repository and base branch, returning CI status, review state, and impacted graph communities.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -1436,14 +1474,16 @@ def _build_server(graph_path: str):
                         "repo": {"type": "string", "description": "GitHub repo (owner/repo). Defaults to current repo."},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=True,
+                ),
             ),
             types.Tool(
                 name="get_pr_impact",
-                description=(
-                    "Get detailed graph impact for a specific PR: which files it changes, "
-                    "which knowledge-graph communities are affected, and how many nodes are touched. "
-                    "Use this to assess merge risk or check for overlap with your current work."
-                ),
+                description="Analyze the graph blast radius for a given pull request number and repository, returning affected files, touched communities, and total nodes.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -1452,14 +1492,16 @@ def _build_server(graph_path: str):
                     },
                     "required": ["pr_number"],
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=True,
+                ),
             ),
             types.Tool(
                 name="triage_prs",
-                description=(
-                    "Return all actionable open PRs (correct base, not stale) with full graph impact data "
-                    "so you can reason about review priority, merge order, and conflict risk. "
-                    "Call this when the user asks 'what PRs should I review?' or 'what's ready to merge?'"
-                ),
+                description="Triage and rank actionable pull requests for an optional repository and base branch, returning prioritized review order and community conflict analysis.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -1467,6 +1509,12 @@ def _build_server(graph_path: str):
                         "repo": {"type": "string", "description": "GitHub repo (owner/repo). Defaults to current repo."},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    readOnlyHint=True,
+                    destructiveHint=False,
+                    idempotentHint=True,
+                    openWorldHint=True,
+                ),
             ),
         ]
         # Multi-project support: every tool accepts an optional project_path.
@@ -1695,7 +1743,12 @@ def _build_server(graph_path: str):
     def _tool_list_prs(arguments: dict) -> str:
         from graphify.prs import fetch_prs, fetch_worktrees, format_prs_text, _detect_default_branch
         repo = arguments.get("repo") or None
-        base = arguments.get("base") or _detect_default_branch(repo)
+        if repo and not re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", repo):
+            return f"Error: Invalid repository format: {repo!r}. Expected 'owner/repo'."
+        base_arg = arguments.get("base")
+        if base_arg and (not re.match(r"^[A-Za-z0-9_./-]+$", base_arg) or base_arg.startswith("-")):
+            return f"Error: Invalid base branch format: {base_arg!r}."
+        base = base_arg or _detect_default_branch(repo)
         try:
             prs = fetch_prs(repo=repo, base=base)
         except RuntimeError as e:
@@ -1707,8 +1760,15 @@ def _build_server(graph_path: str):
 
     def _tool_get_pr_impact(arguments: dict) -> str:
         from graphify.prs import fetch_pr_files, compute_pr_impact, _gh, _parse_ci
-        number = int(arguments["pr_number"])
+        try:
+            number = int(arguments["pr_number"])
+            if number <= 0:
+                return "Error: pr_number must be a positive integer."
+        except (ValueError, KeyError, TypeError):
+            return "Error: Invalid or missing pr_number."
         repo = arguments.get("repo") or None
+        if repo and not re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", repo):
+            return f"Error: Invalid repository format: {repo!r}. Expected 'owner/repo'."
         # Use gh pr view directly — works for any base branch, not just the default
         view_args = ["pr", "view", str(number), "--json",
                      "title,headRefName,baseRefName,author,isDraft,reviewDecision,statusCheckRollup,updatedAt"]
@@ -1739,7 +1799,12 @@ def _build_server(graph_path: str):
         from concurrent.futures import ThreadPoolExecutor, as_completed
         from graphify.prs import fetch_prs, fetch_worktrees, fetch_pr_files, compute_pr_impact, _STATUS_ORDER, _detect_default_branch
         repo = arguments.get("repo") or None
-        base = arguments.get("base") or _detect_default_branch(repo)
+        if repo and not re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", repo):
+            return f"Error: Invalid repository format: {repo!r}. Expected 'owner/repo'."
+        base_arg = arguments.get("base")
+        if base_arg and (not re.match(r"^[A-Za-z0-9_./-]+$", base_arg) or base_arg.startswith("-")):
+            return f"Error: Invalid base branch format: {base_arg!r}."
+        base = base_arg or _detect_default_branch(repo)
         try:
             prs = fetch_prs(repo=repo, base=base)
         except RuntimeError as e:

@@ -2,6 +2,8 @@
 
 # Universal Agent Skills
 
+[![M8ven Verified](https://m8ven.ai/badge/mcp/mehanshbarthwal-lab-universal-agent-skills-1inwyb?variant=verified&v=e4e12e3044c88d440c2817aca1cdbdf7)](https://m8ven.ai/mcp/mehanshbarthwal-lab-universal-agent-skills-1inwyb)
+
 <p><strong>Production AI agent skills and tool protocols across major runtimes</strong></p>
 
 <p>
@@ -60,6 +62,156 @@ Install any skill into your preferred AI agent environment using the following s
 | **Cursor IDE** | `.cursor/rules/<skill-name>.mdc` | Copy the SKILL.md content into your project rules directory. |
 | **ChatGPT / Custom GPT** | System Prompt or Instructions | Paste the full SKILL.md specification into your prompt configuration. |
 | **Direct cURL Download** | Any workspace | `curl -fsSL https://raw.githubusercontent.com/mehanshbarthwal-lab/universal-agent-skills/main/skills/<name>/SKILL.md -o SKILL.md` |
+
+---
+
+## Model Context Protocol Server and Tools
+
+Universal Agent Skills exposes twelve specialized tools through the Model Context Protocol for codebase knowledge graphs, document conversion, and multi network research.
+
+### Installation and Server Execution
+
+To install and run the Model Context Protocol servers locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/mehanshbarthwal-lab/universal-agent-skills.git
+cd universal-agent-skills
+
+# Install dependencies for Python tool servers
+pip install -e skills/graphify
+pip install -e skills/markitdown/packages/markitdown
+pip install -e skills/markitdown/packages/markitdown-mcp
+pip install -e skills/agent-reach
+
+# Run Graphify server over standard input and output
+python -m graphify.serve path/to/graphify-out/graph.json
+
+# Or run Graphify server over Streamable HTTP transport
+python -m graphify.serve path/to/graphify-out/graph.json --transport http --port 8000
+
+# Run MarkItDown server
+python -m markitdown_mcp
+
+# Run Agent Reach server
+python -m agent_reach.integrations.mcp_server
+```
+
+### Twelve Tools Catalog
+
+1. `get_status`: Returns installation status, configuration health, and connectivity readiness across all research channels.
+2. `convert_to_markdown`: Converts documents from web, local filesystem, or data URIs into structured Markdown.
+3. `query_graph`: Queries the knowledge graph using BFS or DFS traversal and returns structural context.
+4. `get_node`: Retrieves full attribute details and relational connections for a specified node label or identifier.
+5. `get_neighbors`: Returns all direct neighbors and relational edges for a given node.
+6. `get_community`: Retrieves all nodes belonging to a designated community cluster.
+7. `god_nodes`: Computes degree centrality ranking to surface the most connected core abstractions.
+8. `graph_stats`: Generates summary metrics covering node count, edge count, and community distributions.
+9. `shortest_path`: Computes the shortest traversal path connecting two concepts in the knowledge graph.
+10. `list_prs`: Lists open pull requests with CI status, review state, and impacted graph communities.
+11. `get_pr_impact`: Analyzes blast radius for a given pull request by mapping changed files to graph communities.
+12. `triage_prs`: Ranks actionable pull requests by review priority and community conflict merge risk.
+
+### Tool Annotations Specification
+
+Every tool provides explicit boolean annotations matching its operational behavior:
+
+| Tool Name | readOnlyHint | destructiveHint | idempotentHint | openWorldHint | Behavior Rationale |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| `get_status` | `true` | `false` | `true` | `false` | Inspects local channel configuration without altering state or making external network requests. |
+| `convert_to_markdown` | `true` | `false` | `true` | `true` | In memory conversion from web or local URIs without mutating sources; accesses external HTTP endpoints. |
+| `query_graph` | `true` | `false` | `true` | `false` | Traverses local in memory graph structure without mutating graph topology. |
+| `get_node` | `true` | `false` | `true` | `false` | Reads node properties from the local knowledge graph without mutating data. |
+| `get_neighbors` | `true` | `false` | `true` | `false` | Reads direct neighboring nodes and edges in local graph memory. |
+| `get_community` | `true` | `false` | `true` | `false` | Reads node cluster memberships for a community from local graph data. |
+| `god_nodes` | `true` | `false` | `true` | `false` | Computes degree centrality ranking of local graph nodes without state mutation. |
+| `graph_stats` | `true` | `false` | `true` | `false` | Computes summary metrics across the local graph without write operations. |
+| `shortest_path` | `true` | `false` | `true` | `false` | Computes shortest path between two concepts within the local graph. |
+| `list_prs` | `true` | `false` | `true` | `true` | Queries pull requests from GitHub and maps impact against local graph. |
+| `get_pr_impact` | `true` | `false` | `true` | `true` | Queries pull request diff from GitHub and evaluates affected local graph communities. |
+| `triage_prs` | `true` | `false` | `true` | `true` | Queries open pull requests from GitHub and computes priority ranking against local graph communities. |
+
+### Network Access and External Hosts
+
+* **Local Graphify Tools**: `query_graph`, `get_node`, `get_neighbors`, `get_community`, `god_nodes`, `graph_stats`, and `shortest_path` operate entirely in memory and make zero network calls.
+* **Pull Request Tools**: `list_prs`, `get_pr_impact`, and `triage_prs` make read only queries to `api.github.com` or invoke the local `gh` CLI.
+* **Document Conversion**: `convert_to_markdown` queries remote HTTP and HTTPS hosts only when the user requests an external web URL. Loopback addresses, private IP ranges, and link local addresses are blocked by default.
+* **Research Channels**: `agent-reach` communicates only with the specific host requested during active user searches (such as Reddit, GitHub, Bilibili, YouTube, or V2EX).
+
+### Local Files Read and Written
+
+* **Files Read**: Local graph data files such as `graphify-out/graph.json` or custom project files; local document paths passed to `convert_to_markdown` (sensitive operating system paths such as private keys, shadow files, and credential stores are blocked); local configuration files in standard configuration directories.
+* **Files Written**: All twelve tools are marked read only and do not write to or mutate project files. Graphify export routines write files only when explicitly requested through CLI options. Temporary scripts and scratch files are cleaned up immediately.
+
+---
+
+## Credentials and Sensitive Files
+
+Universal Agent Skills adheres to credential isolation and safety principles:
+
+* **Zero Read of Legacy Credentials File**: The repository codebase never reads `~/.config/bird/credentials.env`. That legacy file is written only when a user explicitly runs `agent-reach config twitter-cookies --sync-legacy-twitter` to enable backwards compatibility with third party scripts, created with restrictive `0o600` permissions. The uninstallation routine inspects whether the file exists solely to advise the user to perform manual deletion if desired.
+* **Lazy In Memory Evaluation**: All API credentials and authentication tokens are loaded lazily at the exact time their specific feature or upstream query executes. No credentials are read at import or server startup.
+* **Strict Privacy and No Logging**: Credentials and tokens are never printed to terminal output, never written to log files, never included in error messages, and never returned in Model Context Protocol tool responses. Credentials transmit exclusively to the intended service endpoint over encrypted TLS connections.
+
+---
+
+## Environment Variables and Configuration
+
+Variables used across the codebase are grouped into provider secrets, user settings, and ambient system detection. You only need to set a key if you actively use the corresponding feature.
+
+### Secrets and Provider Credentials (Group A)
+
+| Variable Name | Feature | Required or Optional | Secret | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| `ANTHROPIC_API_KEY` | Graphify, SkillOpt | Optional | Yes | API key for Anthropic Claude models. Only needed for Claude backed extraction or optimization. |
+| `OPENAI_API_KEY` | Graphify, SkillOpt | Optional | Yes | API key for OpenAI models. Only needed for OpenAI backed extraction or optimization. |
+| `GEMINI_API_KEY` | Graphify, Skills | Optional | Yes | API key for Google Gemini models. |
+| `GROQ_API_KEY` | Graphify | Optional | Yes | API key for Groq accelerated inference. |
+| `DEEPSEEK_API_KEY` | Graphify | Optional | Yes | API key for DeepSeek models. |
+| `AZURE_OPENAI_API_KEY` | Graphify | Optional | Yes | API key for Azure OpenAI endpoints. |
+| `GITHUB_TOKEN` | Graphify PR Tools | Optional | Yes | GitHub personal access token for higher API rate limits when triaging pull requests. |
+| `TWITTER_AUTH_TOKEN` | Agent Reach | Optional | Yes | Cookie token for Twitter channel searches. Only needed when using Twitter channel. |
+| `AUTH_TOKEN` | Agent Reach | Optional | Yes | Alternative cookie token for Twitter channel searches. |
+| `CT0` | Agent Reach | Optional | Yes | CSRF token cookie for Twitter channel searches. |
+| `BILIBILI_COOKIE` | Agent Reach | Optional | Yes | Authentication cookie for Bilibili video and post searches. |
+| `EXA_API_KEY` | Agent Reach | Optional | Yes | API key for Exa search backend. |
+| `TAVILY_API_KEY` | Agent Reach | Optional | Yes | API key for Tavily search backend. |
+| `JINA_API_KEY` | Agent Reach | Optional | Yes | API key for Jina Reader extraction backend. |
+| `FIRECRAWL_API_KEY` | Scraping Architect | Optional | Yes | API key for Firecrawl extraction pipelines. |
+| `GRAPHIFY_API_KEY` | Graphify HTTP | Optional | Yes | Bearer token authentication for Graphify Streamable HTTP server mode. |
+| `NEO4J_PASSWORD` | Graphify Export | Optional | Yes | Authentication password for Neo4j database synchronization. |
+| `FALKORDB_PASSWORD` | Graphify Export | Optional | Yes | Authentication password for FalkorDB graph database export. |
+
+### User Configuration and Feature Flags (Group B)
+
+| Variable Name | Feature | Required or Optional | Secret | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| `GRAPHIFY_OUT` | Graphify | Optional | No | Directory path where generated graph.json files are stored. Defaults to `graphify-out`. |
+| `GRAPHIFY_MAX_CONTEXTS` | Graphify Server | Optional | No | Maximum number of cached graph contexts in multi project server mode. Defaults to 8. |
+| `GRAPHIFY_API_TIMEOUT` | Graphify | Optional | No | Timeout in seconds for upstream LLM graph extraction requests. |
+| `GRAPHIFY_FORCE` | Graphify | Optional | No | Set to true to force full reindexing of codebase ignoring incremental cache. |
+| `MARKITDOWN_ENABLE_PLUGINS` | MarkItDown | Optional | No | Enables third party plugin converters. Defaults to false. |
+| `MARKITDOWN_ALLOW_PRIVATE_NETWORKS` | MarkItDown | Optional | No | Set to true to allow document conversion from local or private IP addresses. Defaults to false. |
+| `MARKITDOWN_ALLOW_ALL_FILES` | MarkItDown | Optional | No | Set to true to bypass sensitive operating system path filtering for local file conversions. Defaults to false. |
+| `SKILLOPT_JUDGE_MODEL` | SkillOpt | Optional | No | Model identifier used for benchmark scoring. Defaults to Claude 3.5 Sonnet. |
+| `SKILLOPT_RUNNER_MODEL` | SkillOpt | Optional | No | Model identifier used for agent task execution during optimization runs. |
+| `AGENT_REACH_LANG` | Agent Reach | Optional | No | Preferred language code for summarized search results. |
+| `ANTHROPIC_BASE_URL` | Provider Proxy | Optional | No | Custom base URL for Anthropic compatible proxy services. |
+| `OPENAI_BASE_URL` | Provider Proxy | Optional | No | Custom base URL for OpenAI compatible proxy services. |
+| `OLLAMA_HOST` | Local Inference | Optional | No | Host address and port for local Ollama instances. |
+
+### Ambient System State (Group C)
+
+Variables representing ambient system state (such as `SSH_CONNECTION`, `SSH_CLIENT`, `DISPLAY`, `WAYLAND_DISPLAY`, `PYTEST_CURRENT_TEST`, `NVM_HOME`, `XDG_CONFIG_HOME`, `NO_COLOR`, `CLAUDE_PROJECT_DIR`, `APPDATA`, `HOME`, and `TERM`) are read strictly for environment detection, such as determining terminal color support or user configuration directory locations. These are not user configuration options and are never logged or stored.
+
+---
+
+## Limitations
+
+While Universal Agent Skills implements multi layer security checks, the following operational limitations apply:
+
+* **Network Level Egress**: MarkItDown inspects initial destination URIs and every subsequent HTTP redirect against private, loopback, and link local IP blocks. However, protections implemented at the application layer cannot defend against advanced infrastructure threats such as DNS rebinding attacks where IP resolution shifts between validation and socket connection, or network tunnels bypassing application routing. For zero trust deployments, pair this server with operating system firewall egress filters or network proxies.
+* **Local Filesystem Sandboxing**: File URI validation verifies resolved canonical realpaths and blocks recognized sensitive configuration markers and credential paths. Environments requiring strict multi tenant isolation should run Model Context Protocol servers within containerized namespaces or sandboxed virtual machines.
 
 ---
 
