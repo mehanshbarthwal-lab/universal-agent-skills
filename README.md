@@ -18,7 +18,9 @@
   <a href="https://mehanshlabs.qzz.io/universal-agent-skills"><strong>Live Showcase (Portfolio)</strong></a> &nbsp;&bull;&nbsp;
   <a href="https://universal-agent-skills.vercel.app"><strong>Dedicated Portal</strong></a> &nbsp;&bull;&nbsp;
   <a href="ATTRIBUTIONS.md"><strong>Attribution Matrix</strong></a> &nbsp;&bull;&nbsp;
-  <a href="CONTRIBUTING.md"><strong>Contributing Guide</strong></a>
+  <a href="CONTRIBUTING.md"><strong>Contributing Guide</strong></a> &nbsp;&bull;&nbsp;
+  <a href="SECURITY.md"><strong>Security</strong></a> &nbsp;&bull;&nbsp;
+  <a href="PRIVACY.md"><strong>Privacy Policy</strong></a>
 </p>
 
 <br/>
