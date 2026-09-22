@@ -233,6 +233,7 @@ This repository places high value on open source transparency and honest provena
 * **IPYNB Editor**: Programmatic Jupyter Notebook cell inspection and patching utility preserving JSON schema integrity.
 * **Markdown Converter Router**: Dynamic architectural router directing documents across AnyDoc and MarkItDown.
 * **Agent Meter Doctor**: Universal agent telemetry, token waste auditing, TypeSafe Jev System One semantic friction diagnostics, dormant skill classification, and session context pruning paired with an autonomous post turn learning loop.
+* **Jev Decide**: Sub second typed decision primitive powered by TypeSafe AI Jev model. Offloads binary conditions, categorical selections, and ordered scale ratings to System One decision models, eliminating generative token waste while preserving quantitative confidence scoring.
 
 ### Adapted Open Source Projects
 
