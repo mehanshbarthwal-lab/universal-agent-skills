@@ -80,3 +80,30 @@ Each entry in this ledger adheres to the following specification:
 * Strict Prevention Rule: Always use single quoted here strings when generating scripts containing shell variables, and always pass explicit UTF 8 encoding parameters to all file writing commands.
 * Efficiency Gain: Prevents broken background tasks and logging corruption saving 15,000 tokens in debugging loops.
 
+### Entry AP008: Bypassing Jev System One on Decision Requests
+* Category: Token Waste and Logic Errors
+* Detected Date: 2026-09-23
+* Failure Mode: Answering architectural or selection decisions with pure generative prose without executing Jev System One to obtain quantitative decision probabilities first.
+* Root Cause: Defaulting to generative text completion instead of running the fast, typed decision primitive.
+* Detection Signal: User correction asking why Jev was not invoked for a decision.
+* Strict Prevention Rule: Whenever a task requires choosing between options, evaluating risk or urgency, or making a judgment call, execute Jev first via `jev_decide` before providing reasoning or taking action. Thinking and reasoning can be your own, but the decision itself must always be settled by Jev.
+* Efficiency Gain: Eliminates speculative generative drift and ensures quantitative threshold verification.
+
+### Entry AP009: Committing Live Credentials to Public Repositories
+* Category: Security and Secret Leakage
+* Detected Date: 2026 09 23
+* Failure Mode: Committing operational API tokens or Bearer keys directly to public repository tracking instead of sanitized template placeholders.
+* Root Cause: Copying configuration files from local environments directly into tracked repository directories without a credential scrubbing step.
+* Detection Signal: Automated GitGuardian or secret scanning alerts flagging exposed Bearer tokens in git commits.
+* Strict Prevention Rule: All repository documentation and code templates must use generic placeholders such as `<YOUR_API_KEY>`. Operational keys must strictly reside in gitignored local environment files. Always review staged diffs before committing.
+* Efficiency Gain: Eliminates critical security vulnerabilities and costly git history rewrites.
+
+### Entry AP010: Missing Added Date in Showcase Skill Registration
+* Category: Buggy Code and Logic Errors
+* Detected Date: 2026 09 23
+* Failure Mode: Adding a new skill entry to UniversalAgentSkillsShowcase.tsx without specifying the addedDate property.
+* Root Cause: Forgetting to populate the temporal timestamp field when appending new skill items to the showcase collection.
+* Detection Signal: The new skill fails to appear in the 7 day spotlight banner, is excluded from the Recently Added filter count, and lacks the dynamic NEW badge.
+* Strict Prevention Rule: Every time a new skill is registered or committed to UniversalAgentSkillsShowcase.tsx, you must explicitly populate addedDate with the current date string (e.g. YYYY MM DD). This guarantees immediate inclusion in the 7 day autonomous spotlight banner, activates the dynamic NEW card badge, populates the Recently Added filter, and ensures smooth autonomous expiration after 7 days without manual maintenance.
+* Efficiency Gain: Guarantees autonomous visibility and automatic expiration for newly released skills with zero manual intervention.
+
