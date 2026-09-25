@@ -73,9 +73,10 @@ def _load_env_fallback() -> None:
         Path.cwd() / ".env",
         Path(__file__).resolve().parent / ".env",
         Path(__file__).resolve().parent.parent / ".env",
-        Path(r"F:\Agent Skills\jev-decide\.env"),
-        Path(r"F:\Agent Skills\agent-meter-doctor\.env"),
     ]
+    if "AGENT_SKILLS_DIR" in os.environ:
+        candidate_paths.append(Path(os.environ["AGENT_SKILLS_DIR"]) / "jev-decide" / ".env")
+        candidate_paths.append(Path(os.environ["AGENT_SKILLS_DIR"]) / "agent-meter-doctor" / ".env")
 
     for p in candidate_paths:
         if p.exists() and p.is_file():

@@ -35,4 +35,4 @@ On Windows PowerShell:
 $env:TYPESAFE_API_KEY = "your_key_here"
 ```
 
-A local `.env` file inside `F:\Agent Skills\jev-decide\.env` is also automatically detected and read at runtime, and is ignored by git.
+A local `.env` file in the current working directory or skill root directory is also automatically detected and read at runtime, and is ignored by git.

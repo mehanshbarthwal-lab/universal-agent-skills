@@ -1,10 +1,11 @@
+import os
 import openpyxl
 from collections import defaultdict
 import sys
 import re
 
-# TARGET_PATH and SHEET_NAME should be updated per project.
-FILE_PATH = r'F:\SVS Internship Project\consumer_problem_bank_updated.xlsx'
+# TARGET_PATH and SHEET_NAME can be passed as argument or configured via environment variable.
+FILE_PATH = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PROBLEM_BANK_PATH", "consumer_problem_bank_updated.xlsx")
 
 def extract_source_id(url):
     if not url:

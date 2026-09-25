@@ -152,6 +152,7 @@ Every tool provides explicit boolean annotations matching its operational behavi
 Universal Agent Skills adheres to credential isolation and safety principles:
 
 * **Zero Read of Legacy Credentials File**: The repository codebase never reads `~/.config/bird/credentials.env`. That legacy file is written only when a user explicitly runs `agent-reach config twitter-cookies --sync-legacy-twitter` to enable backwards compatibility with third party scripts, created with restrictive `0o600` permissions. The uninstallation routine inspects whether the file exists solely to advise the user to perform manual deletion if desired.
+* **No Access to Sensitive Paths**: The codebase never reads hardcoded absolute filesystem paths, external user profile paths, or sensitive system directories. All local configuration or input paths are resolved relative to the active workspace directory or supplied explicitly through environment variables and command line options.
 * **Lazy In Memory Evaluation**: All API credentials and authentication tokens are loaded lazily at the exact time their specific feature or upstream query executes. No credentials are read at import or server startup.
 * **Strict Privacy and No Logging**: Credentials and tokens are never printed to terminal output, never written to log files, never included in error messages, and never returned in Model Context Protocol tool responses. Credentials transmit exclusively to the intended service endpoint over encrypted TLS connections.
 
@@ -168,9 +169,14 @@ Variables used across the codebase are grouped into provider secrets, user setti
 | `ANTHROPIC_API_KEY` | Graphify, SkillOpt | Optional | Yes | API key for Anthropic Claude models. Only needed for Claude backed extraction or optimization. |
 | `OPENAI_API_KEY` | Graphify, SkillOpt | Optional | Yes | API key for OpenAI models. Only needed for OpenAI backed extraction or optimization. |
 | `GEMINI_API_KEY` | Graphify, Skills | Optional | Yes | API key for Google Gemini models. |
+| `GOOGLE_API_KEY` | Graphify | Optional | Yes | API key for Google Gemini models used as an alternative identifier. |
 | `GROQ_API_KEY` | Graphify | Optional | Yes | API key for Groq accelerated inference. |
 | `DEEPSEEK_API_KEY` | Graphify | Optional | Yes | API key for DeepSeek models. |
+| `MOONSHOT_API_KEY` | Graphify | Optional | Yes | API key for Moonshot Kimi models used for semantic graph extraction. |
 | `AZURE_OPENAI_API_KEY` | Graphify | Optional | Yes | API key for Azure OpenAI endpoints. |
+| `TYPESAFE_API_KEY` | Jev Decide, Agent Meter Doctor | Optional | Yes | API key for TypeSafe AI Jev System One sub second decision model. |
+| `BRAVE_API_KEY` | GSD Core | Optional | Yes | API key for Brave web search integration. |
+| `AWS_ACCESS_KEY_ID` | Graphify Bedrock | Optional | Yes | AWS access key identifier for Amazon Bedrock inference backend. |
 | `GITHUB_TOKEN` | Graphify PR Tools | Optional | Yes | GitHub personal access token for higher API rate limits when triaging pull requests. |
 | `TWITTER_AUTH_TOKEN` | Agent Reach | Optional | Yes | Cookie token for Twitter channel searches. Only needed when using Twitter channel. |
 | `AUTH_TOKEN` | Agent Reach | Optional | Yes | Alternative cookie token for Twitter channel searches. |
@@ -197,6 +203,12 @@ Variables used across the codebase are grouped into provider secrets, user setti
 | `MARKITDOWN_ALLOW_ALL_FILES` | MarkItDown | Optional | No | Set to true to bypass sensitive operating system path filtering for local file conversions. Defaults to false. |
 | `SKILLOPT_JUDGE_MODEL` | SkillOpt | Optional | No | Model identifier used for benchmark scoring. Defaults to Claude 3.5 Sonnet. |
 | `SKILLOPT_RUNNER_MODEL` | SkillOpt | Optional | No | Model identifier used for agent task execution during optimization runs. |
+| `SKILLOPT_SLEEP_WORKERS` | SkillOpt Sleep | Optional | No | Number of concurrent worker threads for offline sleep optimization cycles. |
+| `SKILLOPT_SLEEP_AGENT_MARKERS` | SkillOpt Sleep | Optional | No | Comma separated markers used to identify agent session turns. |
+| `SKILLOPT_SLEEP_PROMPTS_PATH` | SkillOpt Sleep | Optional | No | Custom filesystem path for offline prompt evaluation datasets. |
+| `SKILLOPT_SLEEP_CHAT_EXTRA_BODY` | SkillOpt Sleep | Optional | No | Additional JSON body payload passed to custom inference providers. |
+| `SKILLOPT_SLEEP_COMPAT_MAX_TOKENS` | SkillOpt Sleep | Optional | No | Fallback maximum token limit parameter for compatible endpoints. |
+| `TWITTER_CT0` | Agent Reach | Optional | No | Fallback CSRF cookie token used for Twitter scraping session validation. |
 | `AGENT_REACH_LANG` | Agent Reach | Optional | No | Preferred language code for summarized search results. |
 | `ANTHROPIC_BASE_URL` | Provider Proxy | Optional | No | Custom base URL for Anthropic compatible proxy services. |
 | `OPENAI_BASE_URL` | Provider Proxy | Optional | No | Custom base URL for OpenAI compatible proxy services. |
@@ -204,7 +216,7 @@ Variables used across the codebase are grouped into provider secrets, user setti
 
 ### Ambient System State (Group C)
 
-Variables representing ambient system state (such as `SSH_CONNECTION`, `SSH_CLIENT`, `DISPLAY`, `WAYLAND_DISPLAY`, `PYTEST_CURRENT_TEST`, `NVM_HOME`, `XDG_CONFIG_HOME`, `NO_COLOR`, `CLAUDE_PROJECT_DIR`, `APPDATA`, `HOME`, and `TERM`) are read strictly for environment detection, such as determining terminal color support or user configuration directory locations. These are not user configuration options and are never logged or stored.
+Variables representing ambient system state (such as `SSH_CONNECTION`, `SSH_CLIENT`, `DISPLAY`, `WAYLAND_DISPLAY`, `PYTEST_CURRENT_TEST`, `NVM_HOME`, `GH_CONFIG_DIR`, `XDG_CONFIG_HOME`, `NO_COLOR`, `CLAUDE_PROJECT_DIR`, `APPDATA`, `HOME`, and `TERM`) are read strictly for environment detection, such as determining terminal color support or user configuration directory locations. These are not user configuration options and are never logged or stored.
 
 ---
 
