@@ -2466,6 +2466,7 @@ All AI agents must adhere to the following principles:
 4. Eliminate Dead Components: Audit loaded skills and plugins. Defer loading specialized tools until actively invoked.
 5. Zero Dashes in Documentation: Avoid hyphens, en dashes, and em dashes in all documentation, headers, and bullet lists.
 6. Single Router Skill Architecture and Selective Loading: Whenever installing a skill, creating a skill from a repository, or using any skill in any project, enforce at most ONE lean root \`SKILL.md\` router (\`<120\` lines, YAML \`description:\` under 200 chars) per skill package in \`<skills-directory>\`. Rename all nested sub skill \`SKILL.md\` files or monolithic bodies (\`>15 KB\`) to \`WORKFLOW.md\` and load only the single needed component on demand.
+7. Mandatory Pre Reporting Anti Stale Cache Gate: Across ALL projects, workspaces, and sessions on this machine, verify every parameter, fact, and completion claim directly against physical disk state as a mandatory final step before presenting any report or output to the user. Never rely on conversational memory or generative inference.
 
 ## Part 1: The Four Meters Deep Dive (Claude Code)
 
@@ -4594,7 +4595,6 @@ Sources: github.com/firecrawl/anydoc, github.com/microsoft/markitdown
 `,
   "humanizer": `---
 name: humanizer
-<<<<<<< Updated upstream
 description: |
   Rewrite AI-sounding text so it reads like the writer without changing what it says.
   Use when editing or reviewing prose for AI tells: not-X-but-Y contrasts, one-line
@@ -4602,9 +4602,6 @@ description: |
 license: MIT
 metadata:
   version: "3.1.0"
-=======
-description: Rewrites AI sounding prose into natural human writing by eliminating stock AI phrases, forced triads, em dashes, not X but Y contrasts, and promotional filler.
->>>>>>> Stashed changes
 ---
 
 # Humanizer: remove AI writing patterns
@@ -5103,7 +5100,7 @@ So whenever you are asked to remove watermarks or clean up some text, you should
 `,
   "ponytail": `---
 name: ponytail
-description: "Lazy senior dev mode for any coding task (write, refactor, fix, review): YAGNI, stdlib first, no unrequested abstractions. Not for non-coding requests."
+description: "Lazy senior dev mode for any coding task: the smallest change that fully solves it, and a reply a busy human understands in one read."
 homepage: https://github.com/DietrichGebert/ponytail
 license: MIT
 ---
@@ -5114,50 +5111,46 @@ license: MIT
 
 # Ponytail
 
-You are a lazy senior developer. Lazy means efficient, not careless. You have
-seen every over-engineered codebase and been paged at 3am for one. The best
-code is the code never written.
+You are a lazy senior developer. The best code is the code never written. You solve the whole problem with the least new code. End your reply with one or two lines: what you skipped or did not check, and any risk the user must know.
 
-## Persistence
+Active for the whole session until the user says "stop ponytail" or "normal mode". Switch level: \`/ponytail lite|full|ultra\`.
 
-ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
-unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
-Switch: \`/ponytail lite|full|ultra\`.
+## Before you write
 
-## The ladder
+Read the task and the code it touches. List every place your change must reach: callers, tests, fixtures, config, exports. Check what your change could break for users: data it would destroy or expose, callers that stop working. That is scope. Extra features are not.
 
-Stop at the first rung that holds:
+## The smallest complete change
 
-1. **Does this need to exist at all?** Speculative need = skip it, say so in one line. (YAGNI)
-2. **Already in this codebase?** A helper, util, type, or pattern that already lives here → reuse it. Look before you write; re-implementing what's a few files over is the most common slop.
-3. **Stdlib does it?** Use it.
-4. **Native platform feature covers it?** \`<input type="date">\` over a picker lib, CSS over JS, DB constraint over app code.
-5. **Already-installed dependency solves it?** Use it. Never add a new one for what a few lines can do.
-6. **Can it be one line?** One line.
-7. **Only then:** the minimum code that works.
+Take the first option that fully works:
 
-The ladder is a reflex, not a research project — but it runs *after* you
-understand the problem, not instead of it. Read the task and the code it
-touches first, trace the real flow end to end, then climb. Two rungs work →
-take the higher one and move on. The first lazy solution that works is the
-right one — once you actually know what the change has to touch.
+1. Does it need to exist? Skip features, options and flexibility nobody asked for, and name them in one line. A vague request ("build me X") gets the smallest version that does the core job.
+2. Already in this codebase (a helper, component, service, pattern)? Use it the way the surrounding code does.
+3. Standard library or a platform feature? Use it, unless the project has its own. A house component beats a native widget.
+4. An installed dependency? Use it. Never add a dependency for a few lines.
+5. Can it be one line a reader gets at a glance? One line.
+6. Otherwise: the minimum code that works.
 
-**Bug fix = root cause, not symptom.** A report names a symptom. Before you
-edit, grep every caller of the function you're about to touch. The lazy fix IS
-the root-cause fix: one guard in the shared function is a smaller diff than a
-guard in every caller — and patching only the path the ticket names leaves
-every sibling caller still broken. Fix it once, where all callers route through.
+- Be lazy about the solution, never about the change itself: finish every part the task needs, including the callers, tests and fixtures your change breaks.
+- No abstraction, wrapper, type conversion, option, config, boilerplate or "for later" code nobody asked for. Keep values in the form the platform already gives you. Deletion beats addition. Keep the structure the codebase already has: its layers, interfaces and conventions.
+- The shortest working diff wins, once you know everything it must touch. A one-liner that needs decoding is not short.
+- Comment only the why the code cannot show, in one line.
+- Bug fix: before you edit, grep every caller of the function you touch, then fix the root cause once in the shared code.
+- Code you move or merge keeps its error handling and validation.
+- Between options of equal size, take the one that is correct on edge cases.
+- Lazy code without its check is unfinished: new non-trivial logic (a branch, a loop, a parser, money or security, or a whole new script or app) leaves one small test or an assert-based self-check. Trivial changes need none.
+- A shortcut with a known limit gets a code comment in this form: \`shortcut: <the limit>, <when to upgrade>\`.
 
-## Rules
+Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, the calibration real hardware needs, anything the user asked for.
 
-- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
-- No boilerplate, no scaffolding "for later", later can scaffold for itself.
-- Deletion over addition. Boring over clever, clever is what someone decodes at 3am.
-- Fewest files possible. Shortest working diff wins — but only once you understand the problem. The smallest change in the wrong place isn't lazy, it's a second bug.
-- Complex request? Ship the lazy version and question it in the same response, "Did X; Y covers it. Need full X? Say so." Never stall on an answer you can default.
-- Two stdlib options, same size? Take the one that's correct on edge cases. Lazy means writing less code, not picking the flimsier algorithm.
-- Mark deliberate simplifications that cut a real corner with a known ceiling (global lock, O(n²) scan, naive heuristic) with a \`ponytail:\` comment naming the ceiling and upgrade path (\`# ponytail: global lock, per-account locks if throughput matters\`).
+## Levels
 
+<<<<<<< Updated upstream
+| Level | Behavior |
+|-------|----------|
+| **lite** | Build what was asked. Name the smaller option in one line and let the user pick. |
+| **full** | The rules above. Default. |
+| **ultra** | Also question the request: before building, push back on any part the need does not justify. |
+=======
 ## Output
 
 Code first. Then at most three short lines: what was skipped, when to add it.
@@ -5221,6 +5214,7 @@ The shortest path to done is the right path.
 * \`ponytail-debt\`: \`F:/Agent Skills/ponytail/.openclaw/skills/ponytail-debt/WORKFLOW.md\`
 * \`ponytail-gain\`: \`F:/Agent Skills/ponytail/.openclaw/skills/ponytail-gain/WORKFLOW.md\`
 * \`ponytail-help\`: \`F:/Agent Skills/ponytail/.openclaw/skills/ponytail-help/WORKFLOW.md\`
+>>>>>>> Stashed changes
 `,
   "graphify": `---
 name: graphify
@@ -5280,7 +5274,7 @@ If no path was given, use \`.\` (current directory). Do not ask the user for a p
 
 If the path argument starts with \`https://github.com/\` or \`http://github.com/\`, treat it as a GitHub URL - run Step 0 before anything else, then continue with the resolved local path.
 
-Follow these steps in order. Do not skip steps.
+Follow these steps in order unless the fast path above applies.
 
 ### Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)
 
@@ -5341,7 +5335,9 @@ $(cat graphify-out/.graphify_python) -c "
 import json
 from graphify.detect import detect
 from pathlib import Path
-result = detect(Path('INPUT_PATH'))
+from graphify.paths import out_path
+from graphify.watch import _read_build_excludes, _read_build_gitignore
+result = detect(Path('INPUT_PATH'), extra_excludes=_read_build_excludes(out_path()), gitignore=_read_build_gitignore(out_path()))
 # Write the sidecar from Python, not a shell redirect, so the same block renders
 # on PowerShell hosts without console-encoding drift (#2528).
 Path('graphify-out/.graphify_detect.json').write_text(json.dumps(result, ensure_ascii=False), encoding=\\"utf-8\\")
@@ -5414,7 +5410,10 @@ for f in detect.get('files', {}).get('code', []):
     code_files.extend(collect_files(Path(f)) if Path(f).is_dir() else [Path(f)])
 
 if code_files:
-    result = extract(code_files, cache_root=Path('INPUT_PATH'))
+    # root= anchors node ids and source_file on the scan root; cache_root only says
+    # where graphify-out/cache lives. Pass both: without root= the anchor falls back
+    # to cache_root, so pointing the cache elsewhere would rename every node (#3727).
+    result = extract(code_files, cache_root=Path('INPUT_PATH'), root=Path('INPUT_PATH'))
     Path('graphify-out/.graphify_ast.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding=\\"utf-8\\")
     print(f'AST: {len(result[\\"nodes\\"])} nodes, {len(result[\\"edges\\"])} edges')
 else:
@@ -5439,7 +5438,7 @@ Path('graphify-out/.graphify_semantic.json').write_text(json.dumps({'nodes':[],'
 
 Before dispatching subagents, print a timing estimate:
 - Load \`total_words\` and file counts from \`graphify-out/.graphify_detect.json\`
-- Estimate agents needed: \`ceil(uncached_non_code_files / 22)\` (chunk size is 20-25)
+- Estimate agents needed: \`ceil(uncached_non_code_files / 22)\` (chunk size is 20-25 files, capped at ~6000 total lines)
 - Estimate time: ~45s per agent batch (they run in parallel, so total ≈ 45s × ceil(agents/parallel_limit))
 - Print: "Semantic extraction: ~N files → X agents, estimated ~Ys"
 
@@ -5470,15 +5469,21 @@ if cached_nodes or cached_edges or cached_hyperedges:
 else:
     Path('graphify-out/.graphify_cached.json').unlink(missing_ok=True)
 Path('graphify-out/.graphify_uncached.txt').write_text('\\n'.join(uncached), encoding=\\"utf-8\\")
+# Nothing has been dispatched yet, so any chunk file on disk is a leftover from an
+# interrupted run, and Step B3 merges every .graphify_chunk_*.json it finds.
+for stale in Path('graphify-out').glob('.graphify_chunk_*.json'):
+    stale.unlink()
 print(f'Cache: {len(all_files)-len(uncached)} files hit, {len(uncached)} files need extraction')
 "
 \`\`\`
 
-Only dispatch subagents for files listed in \`graphify-out/.graphify_uncached.txt\`. If all files are cached, skip to Part C directly.
+Only dispatch subagents for files listed in \`graphify-out/.graphify_uncached.txt\`. If all files are cached, skip Steps B1 and B2 but still run Step B3's commands: its merge is the only Part B step that writes \`graphify-out/.graphify_semantic.json\`, and Part C reads that file unconditionally. Do not write an empty \`.graphify_semantic.json\` instead, because that drops every cached node.
 
 **Step B1 - Split into chunks**
 
-Load files from \`graphify-out/.graphify_uncached.txt\`. Split into chunks of 20-25 files each. Each image gets its own chunk (vision needs separate context). When splitting, group files from the same directory together so related artifacts land in the same chunk and cross-file relationships are more likely to be extracted.
+Load files from \`graphify-out/.graphify_uncached.txt\`. Split into chunks bounded by BOTH limits: at most 20-25 files AND at most ~6000 total lines per chunk. A text file longer than 2000 lines gets a chunk to itself - that is past the Read tool's single-call cap, so sharing a chunk with other files guarantees it is only partly read. Each image gets its own chunk (vision needs separate context). When splitting, group files from the same directory together so related artifacts land in the same chunk and cross-file relationships are more likely to be extracted.
+
+Both bounds matter. The line bound is not only about the 2000-line Read cap: a subagent holding 25 files splits its attention across all of them and skims the dense ones, and a 590-line plan can come back with zero nodes that way. Bounding content as well as file count is what keeps a chunk's coverage honest (#2225).
 
 **Step B2 - Dispatch ALL subagents in a single message**
 
@@ -5516,6 +5521,44 @@ Wait for all subagents. For each result:
 
 If more than half the chunks failed or are missing, stop and tell the user to re-run and ensure \`subagent_type="general-purpose"\` is used.
 
+**Step B3.5 - Verify each reported file was actually read to its end**
+
+A subagent that only read the first Read call's worth of a long file still writes a well-formed chunk, so "chunk file exists and parses" is not evidence of coverage. Compare each file's self-reported \`coverage\` against its real length:
+
+\`\`\`bash
+$(cat graphify-out/.graphify_python) -c "
+import json, glob
+from pathlib import Path
+
+covered = {}
+for c in sorted(glob.glob('graphify-out/.graphify_chunk_*.json')):
+    d = json.loads(Path(c).read_text(encoding=\\"utf-8\\"))
+    for src, n in (d.get('coverage') or {}).items():
+        covered[src] = max(covered.get(src, 0), int(n))
+
+partial = []
+for src, n in sorted(covered.items()):
+    p = Path(src)
+    if not p.is_absolute():
+        p = Path('INPUT_PATH') / src
+    if not p.is_file():
+        continue
+    total = sum(1 for _ in p.open(encoding='utf-8', errors='replace'))
+    if total and n < total:
+        partial.append((src, n, total))
+
+Path('graphify-out/.graphify_partial.txt').write_text('\\n'.join(s for s, _, _ in partial), encoding=\\"utf-8\\")
+if partial:
+    print(f'WARNING: {len(partial)} file(s) were only partly read. They are cached as partial and retried on the next --update:')
+    for src, n, total in partial:
+        print(f'  {src}: read {n} of {total} lines')
+else:
+    print('Coverage OK - every file a subagent reported was read to its last line')
+"
+\`\`\`
+
+Tell the user which files came up short and what was lost (the line counts are printed above). The nodes already extracted for those files are kept - they are still true - but the file is cached as partial and left unstamped in the manifest below, so the next \`--update\` re-dispatches it and replace-on-re-extract swaps the partial node set for a complete one. This is the same mechanism the library path uses for a truncated LLM response (#933, #1950), so both paths now recover instead of silently keeping a half-read file forever. A file a subagent did not report at all is not counted as partial - there is nothing to compare against - which is why the prompt rule in \`references/extraction-spec.md\` asks for the count in the first place.
+
 Merge all chunk files into \`.graphify_semantic_new.json\`. **After each Agent call completes, read the real token counts from the Agent tool result's \`usage\` field and write them back into the chunk JSON before merging** — the chunk JSON itself always has placeholder zeros. Then run:
 \`\`\`bash
 $(cat graphify-out/.graphify_python) -c "
@@ -5549,8 +5592,13 @@ from pathlib import Path
 
 new = json.loads(Path('graphify-out/.graphify_semantic_new.json').read_text(encoding=\\"utf-8\\")) if Path('graphify-out/.graphify_semantic_new.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}
 uncached = [line for line in Path('graphify-out/.graphify_uncached.txt').read_text(encoding=\\"utf-8\\").splitlines() if line]
-saved = save_semantic_cache(new.get('nodes', []), new.get('edges', []), new.get('hyperedges', []), root='INPUT_PATH', allowed_source_files=uncached, prompt_file='SPEC_PATH')
-print(f'Cached {saved} files')
+# A partly-read file is cached with partial: True, which load_cached treats as a MISS,
+# so the next --update re-dispatches it instead of serving a truncated extraction forever
+# (#2225). Same contract the library path uses for a truncated LLM response (#933/#1950).
+partial = [line for line in Path('graphify-out/.graphify_partial.txt').read_text(encoding=\\"utf-8\\").splitlines() if line] if Path('graphify-out/.graphify_partial.txt').exists() else []
+saved = save_semantic_cache(new.get('nodes', []), new.get('edges', []), new.get('hyperedges', []), root='INPUT_PATH', allowed_source_files=uncached, prompt_file='SPEC_PATH', partial_source_files=partial)
+note = f' ({len(partial)} left partial for retry)' if partial else ''
+print(f'Cached {saved} files' + note)
 "
 \`\`\`
 
@@ -5595,6 +5643,18 @@ from pathlib import Path
 
 ast = json.loads(Path('graphify-out/.graphify_ast.json').read_text(encoding=\\"utf-8\\"))
 sem = json.loads(Path('graphify-out/.graphify_semantic.json').read_text(encoding=\\"utf-8\\"))
+
+# Stamp tier provenance on the semantic side. build._is_ast_tier reads
+# _origin when present and otherwise guesses from the SHAPE of
+# source_location ('L<line>' means AST). A subagent that writes 'L12' for a
+# doc section therefore made that node read as AST, and the next
+# graphify update deleted it along with the re-extracted code file it
+# seemed to belong to (#2843). extract() stamps its own items 'ast'; the
+# semantic side must say so explicitly.
+for n in sem['nodes']:
+    n.setdefault('_origin', 'semantic')
+for e in sem['edges']:
+    e.setdefault('_origin', 'semantic')
 
 # Merge: AST nodes first, semantic nodes deduplicated by id
 seen = {n['id'] for n in ast['nodes']}
@@ -5811,7 +5871,13 @@ extract = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encod
 # types are gated on output.
 from graphify.cli import _stamped_manifest_files
 _corpus = detect.get('all_files') or detect['files']
-_manifest_files = _stamped_manifest_files(_corpus, extract, Path('INPUT_PATH'))
+# A file a subagent only partly read DID produce output, so the stamp filter alone would
+# keep it - but its node set covers just the head of the file, and stamping it means
+# detect_incremental reads it as done and never re-queues it, leaving the truncated graph
+# live forever. Name those files so they stay unstamped and are retried next run (#2225).
+_pf = Path('graphify-out/.graphify_partial.txt')
+_partial = {l.strip() for l in _pf.read_text(encoding=\\"utf-8\\").splitlines() if l.strip()} if _pf.exists() else set()
+_manifest_files = _stamped_manifest_files(_corpus, extract, Path('INPUT_PATH'), partial_source_files=_partial)
 # Files dispatched this run (the changed subset) but NOT stamped above still carry
 # a stale semantic_hash from a prior run; clear it so detect_incremental re-queues
 # them instead of reading them as unchanged (#1948).
@@ -5848,7 +5914,7 @@ cost_path.write_text(json.dumps(cost, indent=2, ensure_ascii=False), encoding=\\
 print(f'This run: {input_tok:,} input tokens, {output_tok:,} output tokens')
 print(f'All time: {cost[\\"total_input_tokens\\"]:,} input, {cost[\\"total_output_tokens\\"]:,} output ({len(cost[\\"runs\\"])} runs)')
 "
-rm -f graphify-out/.graphify_detect.json graphify-out/.graphify_extract.json graphify-out/.graphify_ast.json graphify-out/.graphify_semantic.json graphify-out/.graphify_analysis.json
+rm -f graphify-out/.graphify_detect.json graphify-out/.graphify_extract.json graphify-out/.graphify_ast.json graphify-out/.graphify_semantic.json graphify-out/.graphify_analysis.json graphify-out/.graphify_partial.txt
 find graphify-out -maxdepth 1 -name '.graphify_chunk_*.json' -delete 2>/dev/null
 rm -f graphify-out/.needs_update 2>/dev/null || true
 \`\`\`
@@ -5868,6 +5934,8 @@ Graph complete. Outputs in PATH_TO_DIR/graphify-out/
 If graphify saved you time, consider supporting it: https://github.com/sponsors/safishamsi
 
 Replace PATH_TO_DIR with the actual absolute path of the directory that was processed.
+
+If PATH_TO_DIR is inside a git repository, add one line to the report: \`graphify-out/\` was written into the working tree, so unless the repository already ignores it, it will show in \`git status\`; the user can add \`graphify-out/\` to \`.gitignore\`, or commit only the outputs their team should share (see https://docs.graphify.com/guides/team-workflows).
 
 Then paste these sections from GRAPH_REPORT.md directly into the chat:
 - God Nodes
@@ -5947,154 +6015,108 @@ When the user asks to install the post-commit auto-rebuild hook or wire graphify
 Complete spec driven development framework: requirements gathering, dependency aware phase planning, parallel subagent dispatch, and verification gates.`,
   "agent-reach": `---
 name: agent-reach
+<<<<<<< Updated upstream
+description: >
+  只读读取各平台内容：搜索、读帖、看评论、取字幕、查行情和职位。
+  Use when 用户提到或贴出链接：小红书/xiaohongshu、B站/bilibili、Twitter/X、Reddit、
+  YouTube（字幕、转录）、GitHub、V2EX、雪球/股票行情、LinkedIn/Boss直聘 职位、
+  Instagram、Facebook、小宇宙播客；或说"帮我搜/看看/读一下...
 description: Multi platform internet research and extraction router across 16 platforms (Reddit, X, YouTube, GitHub, LinkedIn, Xiaohongshu, Bilibili, RSS, web). Run agent-reach doctor --json to select backend.
+>>>>>>> Stashed changes
 metadata:
   homepage: https://github.com/Panniantong/Agent-Reach
+  version: "{{VERSION}}"
 ---
 
-# Agent Reach — 互联网能力路由器
+# Agent Reach
 
-16 平台、多后端。**本 skill 存在时必须用它访问这些平台，不要自己发明方案。**
+一个命令读所有平台：\`agent-reach\`。只读，默认输出一行 JSON。
 
-## 常驻规则（全程适用）
+动手前先说一句"用 agent-reach skill（X 渠道）"。本 skill 被调用后全程有效，以下规则一直适用。
 
-1. **动手前先体检**：多后端/登录态平台（小红书/Reddit/B站/Twitter/Facebook/Instagram/Boss直聘）先跑
-   \`agent-reach doctor --json\`。\`active_backend\` 有值时按它选命令组；\`active_backend: null\`
-   表示 Doctor 为避免触发浏览器 Cookie 读取或远端写入而没有做实时验证，不代表后端不存在。
-   Doctor 结果是「某一时刻的快照」，通道/登录态可能已变化；执行只读命令前若怀疑失效，
-   按对应 reference 的「体检与恢复」runbook 重新确认（如 career.md 的 Boss直聘 CDP 排查）。
-2. **声明你在用什么**：开始干活前说一句「使用 agent-reach 的 X 平台 / Y 后端」。
-3. **失败按 references 里的重试链处理**，不要瞎猜命令。
-4. **全网调研类任务**：组合多平台（Exa 搜索 + Twitter/Reddit 看讨论 + 小红书/B站看中文场景），并行收集再汇总。
-5. **替用户盯版本**：完成一次较大的调研/多平台任务后，顺手跑
-   \`agent-reach check-update\`（很快，一个 API 调用）。有新版就在收尾汇报里附一句：
-   「Agent Reach 有新版 vX.Y.Z，复制这句话给我即可更新：帮我更新 Agent Reach：
-   https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md」。
-   不要中断当前任务去更新，也不要重复提醒同一个版本。
+## 选路
 
-## 路由表
-
-| 用户意图 | 分类 | 详细文档 |
-|---------|------|---------|
-| 网页搜索/代码搜索 | search | [references/search.md](references/search.md) |
-| 小红书/推特/B站/V2EX/Reddit/Facebook/Instagram | social | [references/social.md](references/social.md) |
-| 招聘/职位/LinkedIn/Boss直聘 | career | [references/career.md](references/career.md) |
-| GitHub/代码 | dev | [references/dev.md](references/dev.md) |
-| 网页/文章/RSS | web | [references/web.md](references/web.md) |
-| YouTube/B站/播客字幕 | video | [references/video.md](references/video.md) |
-| 雪球/股票行情 | finance | [references/finance.md](references/finance.md) |
-
-## 零配置快速命令
+- 公开内容先用你自带的搜索/读取工具（可加 \`site:域名\`）。正文、评论、字幕分别核对是否已拿到；够了就直接回答，不装渠道、不登录。
+- 自带工具不可用、结果缺了用户要的部分、或用户要的是渠道声明的站内动作时，再用 Reach。不确定有哪些动作和参数先跑 \`agent-reach channels\`。
+- 渠道已经加上（默认渠道或 \`add\` 过）时，搜索/阅读直接走该站工具；还没加的渠道，搜索/阅读先试免登录公开网页，结果里 \`backend: public-web\` 标明来源。\`--backend public-web\` 只查公开网页；\`--backend <后端>\` 指定站内工具。
+- 平台名或链接只用来认出来源，不自动触发安装或登录。
+- 摘要、页面壳、评论计数、字幕轨道列表不等于正文、评论或字幕本身，要分别说明。用户跳过登录时，已拿到的公开结果照样交付。
 
 \`\`\`bash
-# Exa 网页搜索
-mcporter call exa.web_search_exa query="query" numResults=5
-
-# 通用网页阅读
-curl -s "https://r.jina.ai/URL"
-
-# GitHub 搜索
-gh search repos "query" --sort stars --limit 10
-
-# YouTube 字幕（注意：B站不要用 yt-dlp，失败重试链见 video.md）
-yt-dlp --write-sub --write-auto-sub --skip-download -o "/tmp/%(id)s" "URL"
-
-# V2EX 热门
-curl -s "https://www.v2ex.com/api/topics/hot.json" -H "User-Agent: agent-reach/1.0"
-
-# B站搜索（bili-cli，无需登录）
-bili search "query" --type video -n 5
+agent-reach channels                      # 每个渠道的动作和参数
+agent-reach <渠道> <动作> [参数]          # 例：agent-reach xiaohongshu search "咖啡" --limit 5
+agent-reach read <链接>                   # 按链接自动选渠道
 \`\`\`
 
-## 需登录态的平台（按 doctor 的 active_backend 选命令）
+## 结果与错误
 
-Twitter 注意：\`agent-reach configure twitter-cookies\` 保存的 Cookie 只供
-\`doctor\` 检查配置是否齐全；\`doctor\` 不执行 \`twitter status\`，也不会设置当前
-Shell。直接运行 \`twitter\` 前，必须在子进程环境中显式提供
-\`TWITTER_AUTH_TOKEN\` 和 \`TWITTER_CT0\`，不得在日志或命令回显中暴露值。
+- \`ok: true\` → 内容在 \`items\`，每条有 \`title / url / author / published_at / text\`，原始数据在 \`raw\`。
+- \`ok: false\` → 看 \`error.code\`，照 \`error.hint\` 做：
 
-小红书注意：Agent Reach 不替用户登录，也不读取浏览器 Cookie。OpenCLI 只用
-用户已有且明确控制的 Chrome 会话；没有现成会话时不要自动登录，改用
-Cookie-Editor 手工导出后配置 xiaohongshu-mcp / 存量工具。
+| error.code | 怎么办 |
+|---|---|
+| \`NEED_SETUP\` | 缺依赖或密钥。按提示 \`agent-reach add <渠道>\`；要密钥时请用户本人提供，再 \`agent-reach configure <key>\` |
+| \`NEED_LOGIN\` | 保留已有结果，告诉用户需要登录；\`agent-reach login <渠道>\` 打开浏览器，由用户本人登录，你绝不代登、不要密码 |
+| \`UPSTREAM_BROKEN\` | 这个平台暂时有问题，\`message\` 是出错时的原话。用平台名告诉用户哪个平台暂时用不了、大概是什么原因，不说工具名；原话说明工具过时，才在用户同意后跑一次 \`agent-reach update\`；不循环重试 |
+| \`TIMEOUT\` | 看失败阶段和渠道状态（\`agent-reach doctor --text\`）；不反复重试、不反复开窗 |
+| \`RATE_LIMITED\` | 平台限流，Reach 已暂停该渠道；按 \`retry_after_seconds\` 等，不换后端 |
+| \`PLATFORM_BLOCKED\` | 平台要求验证（验证码/风控）。停下，请用户在官方页面处理；不换账号、不换后端 |
+| \`BUSY\` | 排队等了 2 分钟浏览器仍然满，或用户正开着登录窗口。过一会儿、或等用户说登好了再试；不关窗口、不切换配置 |
+| \`NOT_FOUND\` | 内容不存在，核对链接或 ID |
+| \`BAD_INPUT\` | 参数不对，跑 \`agent-reach channels\` 看用法 |
 
-Boss直聘配置触发：当用户说“帮我配 Boss直聘”时，先读取 \`references/career.md\`
-的 Boss 章节，然后在获得安装授权后运行
-\`agent-reach install --env=local --system --channels=boss\`。Agent 负责按系统启动
-只绑定 \`127.0.0.1:9222\` 的专用 Chrome；**拉起后第一步是暂停并让用户肉眼确认**
-窗口内是已登录状态（右上角有头像），未登录则让用户登录/扫码，用户确认后再运行
-\`boss --cdp-url http://localhost:9222 login --cdp\` 和 \`agent-reach doctor\` 验收。
-不要让用户自己研究端口参数。
-专用 Chrome profile 必须长期复用，不要每次创建，也不要默认改用日常主 Chrome。
+遇到 \`PLATFORM_BLOCKED\`、\`RATE_LIMITED\`、\`NEED_LOGIN\`、\`BUSY\` 就停止本次尝试，不换账号、后端或浏览器反复请求。网络失败或某台机器的失败不能说成"平台必须登录"。
 
-判断 CDP 浏览器登录态**不要信 \`boss status\`**（它只校验本地 session.enc，与
-浏览器登录态互不代表），以 \`agent-reach doctor\` 的浏览器 cookie 探测（wt2）
-为准，并配合用户肉眼确认。绝不用当前页 URL 判断登录态：
-\`security-check\` / \`zhipin-security\` / \`_security_check\` 安全校验页是 Boss 反爬挑战，
-与登录无关——已登录也会出现（带 CDP 调试端口的 Chrome 几乎必现）。看到它不要
-当成“未登录”，先跑 \`agent-reach doctor\` 看浏览器 cookie，再决定是否需要用户登录。
-搜索报 \`AUTH_EXPIRED\` 即浏览器未登录的 ground truth：直接走登录流程 + \`login --cdp\`，
-不要往安全校验方向解释。
+## 登录与专用浏览器
 
-执行搜索时必须使用
-\`boss --browser-source existing-browser --cdp-url http://localhost:9222 search ...\`；
-遇到 \`ENVIRONMENT_RISK\` 立即停止，不刷新、不重新登录、不自动重试。
+所有浏览器渠道共用一个专用浏览器（优先 CloakBrowser，装不上时用本机 Chrome），默认无头不弹窗，闲置 10 分钟自动关闭，下次调用自动重开。可以并行调用（包括子代理同时查）：同一平台最多同时 2 条，所有平台合计 4 条，多出来的自动排队；同一平台的两次搜索之间至少隔 10 秒。
 
-\`\`\`bash
-# Twitter 搜索（twitter-cli 首选；失败重试链见 social.md）
-twitter search "query" -n 10
+第一次用某个网站时，如果用户的 Chrome 已连接 OpenCLI 扩展，程序会把该站登录自动复制一次到专用浏览器，之后一直复用；只复制该站，不动原浏览器。登录失效或没有可复制的来源时，才请用户本人 \`agent-reach login <渠道>\`。刷新、选来源、退出等细节见 [会话与专用浏览器](references/sessions.md)：用户要登录、退出、换账号，或遇到 \`NEED_LOGIN\` 时读它。
 
-# Reddit（无零配置路径：OpenCLI 或 rdt-cli，必须登录态）
-opencli reddit search "query" -f yaml   # 桌面
-rdt search "query" --limit 10            # 存量/服务器
+## 平台注意
 
-# 小红书（桌面首选 OpenCLI）
-opencli xiaohongshu search "query" -f yaml
+- 小红书 read 只返回文字描述，不要声称看懂了图片或视频。
+- Boss 直聘搜索结果 \`salary_encoded=true\` 时绝不猜薪资数字；read 职位链接拿详情里的可读薪资。
+- 各平台公开能做什么、Reach 补什么，见 [能力边界](references/capabilities.md)：用户问"能查什么/查得全吗"或要判断结果完整度时读它。
 
-# Facebook / Instagram（桌面 OpenCLI，复用浏览器登录态）
-opencli facebook search "query" -f yaml
-opencli facebook groups -f yaml
-opencli instagram search "query" -f yaml       # 搜用户
-opencli instagram user USERNAME -f yaml        # 读指定用户最近帖子
-\`\`\`
+## 渠道
 
-## 环境检查
+{{CHANNEL_TABLE}}
 
-> 本机 Python 环境默认是 conda \`dl\`；若 \`agent-reach\` 不在 PATH，用
-> \`conda run -n dl agent-reach ...\` 前缀。
+\`default\` 是默认安装的渠道，也可以去掉，去掉后更新不会加回来。\`login\` 列是认证入口，不是查公开内容的前提。
 
-\`\`\`bash
-# 检查可用 channel 与每个平台当前激活的后端
-conda run -n dl agent-reach doctor --json
-\`\`\`
+## 安装完成时
 
-## OpenCLI 适配器发现
+\`agent-reach setup\` 后，把 \`result.installation_report.markdown\` 原样展示给用户，不增删、不重排、不自己补问候或表格；报告由程序生成。
 
-路由表没有覆盖用户需要的平台或命令时，先用 \`opencli list\` 查已有适配器，再用
-\`opencli <平台> --help\` 查看公开命令。发现适配器只证明命令存在，不证明登录态或
-目标内容可用；仅在用户任务明确需要该平台时执行只读命令，并以实际非空内容验收。
+## 用户要管理 Agent Reach 时
 
-## 工作区规则
+| 用户说 | 你运行 |
+|---|---|
+| 加上某个平台 | \`agent-reach add <渠道>\`，依赖自动装好；只告诉用户他必须做的事（登录或提供密钥） |
+| 去掉某个平台 | \`agent-reach remove <渠道>\` |
+| 登录 / 登录过期 | \`agent-reach login <渠道>\`，由用户本人在打开的窗口里登录 |
+| 退出登录 | \`agent-reach logout <渠道>\` |
+| 看看状态 / 哪些能用 | \`agent-reach doctor --text\`；要实测跑 \`agent-reach check <渠道> --text\` |
+| 升级 / 更新 | \`agent-reach update\` |
+| 卸载 | 先 \`agent-reach uninstall --dry-run\` 给用户看，确认后 \`agent-reach uninstall\` |
+| 让另一个 AI 也能用 | \`agent-reach skill link <那个 AI 的 skill 目录>\`；\`agent-reach skill\` 查看现在放在哪 |
 
-**不要在 agent workspace 创建文件。** 使用 \`/tmp/\` 存放临时输出，\`~/.agent-reach/\` 存放持久数据。
+故障排查、浏览器维护和卸载细节见 [维护说明](references/maintenance.md)：更新失败、浏览器起不来或要卸载时读它。
 
-## 详细文档
+## 有新版本时
 
-根据用户需求，阅读对应的详细文档：
+结果里出现 \`meta.update\` 就说明有新版本。每次对话只提一次，用用户的语言、大白话：
 
-- [搜索工具](references/search.md) — Exa AI 搜索
-- [社交媒体](references/social.md) — 小红书, Twitter, B站, V2EX, Reddit, Facebook, Instagram（多后端/登录态命令组）
-- [职场招聘](references/career.md) — LinkedIn, Boss直聘
-- [开发工具](references/dev.md) — GitHub CLI
-- [网页阅读](references/web.md) — Jina Reader, RSS
-- [视频播客](references/video.md) — YouTube, B站, 小宇宙
-- [金融行情](references/finance.md) — 雪球股票行情、搜索、热门内容
+1. 告诉用户有新版本（\`meta.update.latest\`）。
+2. 从 \`meta.update.notes\` 挑 1 到 3 个要点说清改了什么。
+3. 问要不要更新；用户同意后才跑 \`agent-reach update\`。
 
-## 配置渠道
+## 红线
 
-如果某个 channel 需要配置，获取安装指南：
-https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
-
-用户只需提供 cookies，其他配置由 agent 完成。
+- 只读。发帖、评论、点赞、私信一律不做。
+- 不替用户登录，不索要或输出密码、Cookie 等凭据。
+- 普通查询不改依赖、不自动更新。
 `,
   "frontend-slides": `---
 name: frontend-slides
@@ -6949,7 +6971,7 @@ Only save a transcript if the user asks for it or if the question is significant
 `,
   "karpathy-guidelines": `---
 name: karpathy-guidelines
-description: Permanent coding posture enforcing Karpathy four instincts: state assumptions explicitly, keep implementations minimal (YAGNI), keep diffs surgical, and verify completion before claiming done.
+description: "Permanent coding posture enforcing Karpathy four instincts: state assumptions explicitly, keep implementations minimal (YAGNI), keep diffs surgical, and verify completion before claiming done."
 ---
 
 # Karpathy Guidelines
@@ -7108,15 +7130,11 @@ You can capture the output of this command to read the document.
 `,
   "agent-video": `---
 name: watch
-<<<<<<< Updated upstream
 description: Watch a video (URL or local path).
 license: MIT
 allowed-tools: Bash, Read, AskUserQuestion
 metadata:
   version: "0.3.2"
-=======
-description: Downloads videos via yt-dlp, extracts scaled frames with ffmpeg, and pulls transcripts to analyze video URLs or local video files.
->>>>>>> Stashed changes
 ---
 
 # /watch
@@ -7127,7 +7145,6 @@ Run the bundled Python script. With the **gemini** engine (a \`GEMINI_API_KEY\` 
 
 \`SKILL_DIR\` is the absolute directory containing this SKILL.md; \`scripts/\` sits beside it.
 
-<<<<<<< Updated upstream
 Commands below use \`python3\` for macOS/Linux. On Windows, verify a working Python 3.10+ with \`python --version\` or \`py -3 --version\` and use that interpreter. \`python3\` is not always a Store alias; inspect the actual result. In PowerShell use \`$SKILL_DIR\` rather than Bash variable syntax, for example:
 
 \`\`\`powershell
@@ -7135,15 +7152,6 @@ python "$SKILL_DIR/scripts/setup.py" --json
 \`\`\`
 
 Use the host's available shell, image viewer, and question tool. \`AskUserQuestion\` and Bash are examples, not requirements for every host.
-=======
-\`\`\`
-Read ~/.claude/plugins/cache/agent-video/watch/<ver>/skills/watch/SKILL.md → SKILL_DIR=…/skills/watch
-Read ~/.codex/skills/watch/SKILL.md                                          → SKILL_DIR=~/.codex/skills/watch
-Read ~/.agents/skills/watch/SKILL.md                                         → SKILL_DIR=~/.agents/skills/watch
-\`\`\`
-
-Substitute that literal path for \`\${SKILL_DIR}\` in every command. This works on every harness (AI Agents (the AI Agent Code, Cursor, Antigravity, etc.), Codex, Cursor, Gemini CLI, …) without relying on any harness-specific environment variable. Guard once at the start of a run:
->>>>>>> Stashed changes
 
 ## First run and setup
 
@@ -7287,86 +7295,7 @@ For follow-ups, reuse evidence already viewed before rerunning. Remove only the 
 - Runtime artifacts live in this run's working directory. User settings/keys live in \`~/.config/watch/.env\`; cwd \`.env\` is a cloud-key fallback. POSIX writes use mode 0600; Windows ACLs are not audited. Use a Linux-home config in WSL, since Windows-mounted homes have different permission semantics.
 - The managed environment lives at \`~/.cache/watch/whisperx-venv\`, outside the plugin. Model caches normally live at \`~/.cache/huggingface\` and \`~/.cache/torch/hub\`. uv also caches packages and managed Python. Reinstalling the skill does not remove these.
 
-<<<<<<< Updated upstream
 Bundled scripts: \`watch.py\`, \`download.py\`, \`frames.py\`, \`transcribe.py\`, \`whisper.py\`, \`local_whisperx.py\`, \`gemini.py\`, \`config.py\`, \`runtime.py\`, and \`setup.py\` under \`scripts/\`. The base runtime uses only Python's standard library; optional WhisperX dependencies remain in its separate process/environment.
-=======
-**Step 5 — clean up.** The script prints a working directory at the end. If the user isn't going to ask follow-ups about this video, delete it with \`rm -rf <dir>\`. If they might, leave it in place.
-
-## Detail and frames
-
-Default behavior comes from \`~/.config/watch/.env\`:
-
-- \`WATCH_DETAIL=transcript|efficient|balanced|token-burner\` (default: \`balanced\`)
-
-At \`transcript\` detail, captions are enough to return a report without downloading video. If captions are missing, the script downloads audio only and tries Whisper. If no transcript can be produced, it reports the limitation clearly; re-run with \`--detail balanced\` for frames.
-
-At \`efficient\` detail, the script downloads the video and extracts **keyframes only** (\`ffmpeg -skip_frame nokey\`) — a near-instant pass that lands frames on scene cuts. If a clip has fewer than 4 keyframes it falls back to uniform sampling.
-
-At \`balanced\` / \`token-burner\` detail, the script extracts **scene-aware** frames: ffmpeg scene-change selection first, falling back to uniform sampling only when the video is effectively static. \`balanced\` caps at 100 frames; \`token-burner\` is uncapped. Frame report lines include both timestamp and selection reason. Extracted images are clamped to a maximum 1998px height for AI Agent Read compatibility.
-
-## Transcript-cue frames
-
-Visual frame selection (scene/keyframe) can miss the moments a presenter explicitly flags — "look here", "as you can see", "notice this", "watch what happens" — because pointing at a slide is often a *low* visual change. \`--timestamps\` lets you force a frame at those exact moments. **You** decide which moments matter, by reading the transcript:
-
-1. Run once at \`--detail transcript\` (or any detail) to get the timestamped transcript.
-2. Scan it for deictic cues — phrases where the speaker directs attention to something on screen. This is a judgment call (ignore rhetorical "look, the point is…"); that's why it's done by you, not a regex.
-3. Re-run with \`--timestamps 4:32,7:10,9:55\` (absolute source times). For a URL, point the second run at the **downloaded local file** in the work dir so it doesn't re-download.
-
-Behavior:
-- **Additive by default.** Cue frames (\`reason=transcript-cue\`) are merged into whatever \`--detail\` already selected, in chronological order.
-- **Pinned and counted first.** Cue frames are reserved against the frame cap before the detail engine runs, so they're never evicted by even-sampling.
-- **Honors focus mode.** With \`--start/--end\`, any cue timestamp outside the window is dropped (reported in the summary). Coordinates are always absolute source time.
-- **Cue-only frames.** \`--detail transcript --timestamps …\` skips scene/keyframe sampling and returns *only* the cue frames (it will download the video to do so, since frames need pixels).
-
-## Transcription
-
-The script gets a timestamped transcript in one of two ways:
-
-1. **Native captions (free, preferred).** yt-dlp pulls manual or auto-generated subtitles from the source platform if available.
-2. **Whisper API fallback.** If no captions came back (or the source is a local file), the script extracts audio (\`ffmpeg -vn -ac 1 -ar 16000 -b:a 64k\`, ~0.5 MB/min) and uploads it to whichever Whisper API has a key configured:
-   - **Groq** — \`whisper-large-v3\`. Preferred default: cheaper, faster. Get a key at console.groq.com/keys.
-   - **OpenAI** — \`whisper-1\`. Fallback. Get a key at platform.openai.com/api-keys.
-
-Both keys live in \`~/.config/watch/.env\`. The script prefers Groq when both are set; override with \`--whisper openai\` to force OpenAI. Use \`--no-whisper\` to skip the fallback entirely.
-
-## Failure modes and handling
-
-- **Setup preflight failed** → run \`python3 "\${SKILL_DIR}/scripts/setup.py"\` (auto-installs ffmpeg/yt-dlp via brew on macOS, scaffolds the \`.env\`). For API key, ask the user via \`AskUserQuestion\` and write it to \`~/.config/watch/.env\`.
-- **No transcript available** → captions missing AND (no Whisper key OR Whisper API failed). Script prints a hint pointing to setup. Proceed frames-only and tell the user.
-- **Long video warning printed** → acknowledge it in your answer. Offer to re-run focused on a specific section via \`--start\`/\`--end\` rather than a sparse full-video scan.
-- **Download fails** → yt-dlp's error goes to stderr. If it's a login-required or region-locked video, tell the user plainly; do not keep retrying.
-- **Whisper request fails** → the error is printed to stderr (likely: invalid key or rate limit). Audio over the API's 25 MB upload cap is split into chunks and transcribed automatically, so length alone won't fail it; if some chunks fail the transcript is partial and the dropped chunks are noted on stderr. The report will say "none available" only if every chunk fails. You can retry with \`--whisper openai\` if Groq failed (or vice versa).
-
-## Token efficiency
-
-This skill burns tokens primarily on frames. Order of magnitude:
-- 80 frames at 512px wide is roughly 50-80k image tokens depending on aspect ratio.
-- The transcript is cheap (a few thousand tokens at most for a 10-minute video).
-- Bumping \`--resolution\` to 1024 roughly quadruples the image tokens per frame. Only do it when necessary.
-
-If you already watched a video this session and the user asks a follow-up, do **not** re-run the script — you already have the frames and transcript in context. Just answer from what you have.
-
-## Security & Permissions
-
-**What this skill does:**
-- Runs \`yt-dlp\` locally to download the video and pull native captions when the source supports them (public data; the request goes directly to whatever host the URL points at)
-- Runs \`ffmpeg\` / \`ffprobe\` locally to extract frames as JPEGs and, when Whisper is needed, a mono 16 kHz audio clip
-- Sends the extracted audio clip to Groq's Whisper API (\`api.groq.com/openai/v1/audio/transcriptions\`) when \`GROQ_API_KEY\` is set (preferred — cheaper, faster)
-- Sends the extracted audio clip to OpenAI's audio transcription API (\`api.openai.com/v1/audio/transcriptions\`) when \`OPENAI_API_KEY\` is set and Groq is not, or when \`--whisper openai\` is forced
-- Writes the downloaded video, frames, audio, and an intermediate transcript to a working directory under the system temp dir (or \`--out-dir\` if specified) so the AI Agent can \`Read\` them
-- Reads / creates \`~/.config/watch/.env\` (mode \`0600\`) to store the Whisper API key(s) and a \`SETUP_COMPLETE\` marker. As a fallback, also reads \`.env\` in the current working directory
-
-**What this skill does NOT do:**
-- Does not upload the video itself to any API — only the extracted audio goes out, and only when native captions are missing AND Whisper is not disabled with \`--no-whisper\`
-- Does not access any platform account (no login, no session cookies, no posting) — yt-dlp only ever requests public data
-- Does not share API keys between providers (Groq key only goes to \`api.groq.com\`, OpenAI key only goes to \`api.openai.com\`)
-- Does not log, cache, or write API keys to stdout, stderr, or output files
-- Does not persist anything outside the working directory and \`~/.config/watch/.env\` — clean up the working directory when you're done (Step 5)
-
-**Bundled scripts:** \`scripts/watch.py\` (entry point), \`scripts/download.py\` (yt-dlp wrapper), \`scripts/frames.py\` (ffmpeg frame extraction), \`scripts/transcribe.py\` (caption selection + Whisper orchestration), \`scripts/whisper.py\` (Groq / OpenAI clients), \`scripts/setup.py\` (preflight + installer)
-
-Review scripts before first use to verify behavior.
->>>>>>> Stashed changes
 `,
   "openhuman": `---
 name: openhuman
