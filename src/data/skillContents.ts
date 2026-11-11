@@ -7580,5 +7580,72 @@ A valid entry is a genuine, specific complaint about a domestic KITCHEN or WASHR
 - PH-003, PH-014, PH-015, PH-018 were wrongly marked Commercial for ordinary residential complaints (own toilet, own washing machine, own tap water, own flat) — corrected 2026-08-06. This is the exact category of mistake to check against every future entry, not something to file away as one-time noise.
 - PH-022 (roommate candle-smell side detail) and PH-027 ("smelled blood in the water" metaphor) were logged as valid entries despite having no real connection to kitchen/washroom odor — removed 2026-08-06. This was a keyword-match failure, the same failure class as the original PH-044–049 incident.
 - **Stale Base / False Live-File Appends (2026-08-06):** Claimed to have appended new entries to the "live file" (e.g. \`consumer_problem_bank_updated.xlsx\`) and run "live dedup" when actually operating on a stale local snapshot. Because the file read from disk was silently diverged from the user's actual active document (the user had a 47-row verified base they hadn't overwritten on disk, or the Python script read an out-of-sync version), the dedup missed multiple duplicates (PH-072, PH-073) that were already in the user's true base. This was only caught because the user independently verified the data. **Permanent Rule:** Never claim "live file" access or successful append unless you can prove you are reading/writing the exact file at the exact path the user actively opens. If the file access model relies on local mounted copies that the user must manually transfer, state "I do not have live access" prominently before every file operation and never claim to be appending to the live file. Always re-verify the row count and ID range of the base file before appending anything to ensure it matches expectations.
+
+
+## Inderscience Journal Avoidance Policy (Turnaround Paralysis and Black Hole Tracking)
+**Issue**: Submitting research manuscripts to Inderscience Publishers journals (such as IJAAPE, AAJFA, IJTPM, IJEF, IJMFA) causes severe publishing delays and pipeline paralysis.
+**Cause**:
+1. Inderscience online submission portal exhibits a chronic lack of status transparency. Manuscripts sit in unmonitored queues for 30 to 90+ days without editorial progression or status changes.
+2. Extremely high rate of late arbitrary desk rejections after prolonged waiting periods without constructive reviewer critique.
+3. Certain Inderscience titles harbor undisclosed Open Access author fee traps (such as IJMFA demanding EUR 1,700 APC), directly violating the zero author fee mandate.
+**Resolution**:
+1. Strictly avoid Inderscience journals across all active internship manuscripts where publication velocity and milestone certainty are required.
+2. In all internship progress reports and supervisor updates, include Inderscience in the mandatory section on Journals NOT to Target with explicit turnaround risk metrics.
+3. Prioritize transparent alternative publishers offering 0 INR author fees:
+   * Springer Nature hybrid journals (SN Business & Economics, SN Social Sciences, GJFSM, TIRS) utilizing the real time Springer Nature SNAPP tracking portal.
+   * Emerald Publishing hybrid journals (QRFM, British Food Journal, Employee Relations, Vilakshan XJM, IJESM) utilizing ScholarOne Manuscripts with active editorial communication.
+   * Premier society Diamond Open Access journals (Journal of Horticultural Sciences, Indian Journal of Medical Research).
+
+
+## Mandatory 4 Pillar Pre Submission Handover Gate (Zero Overstatement, Plain English Core, Disciplinary Fit, Prior Rejection Remediation)
+**Issue**: Agents handing over manuscript packages to users with overstated journal claims, unexamined niche relevance, opaque technical jargon, or unresolved prior rejection critiques.
+**Cause**:
+1. Generative models defaulting to flattering or optimistic assertions (claiming a journal is "perfect" or "rapid" without citing empirical median turnaround times).
+2. Leaving authors unable to explain or defend their own paper core thesis to supervisors or handling editors.
+3. Overlooking prior rejection points from earlier venues or conferences, leading to repeated desk rejections.
+**Resolution**:
+Before handing over any final submission package to the user across any project or manuscript, the agent MUST execute the 4 Pillar Pre Submission Handover Gate:
+1. **Pillar 1 (Plain Language Paper Essence):** Deliver a 4 point plain English breakdown (Core Problem, What Was Tested, Big Discovery, Final Conclusion & Value) with zero technical jargon.
+2. **Pillar 2 (Niche & Disciplinary Scope Fit):** Articulate explicit theoretical and practical mechanisms connecting the niche topic to the broad journal aims (such as mapping forensic AI to Information Asymmetry and Agency Theory in economics).
+3. **Pillar 3 (Zero Overstatement & Live Anti Hallucination Audit):** Check official publisher databases live for title, ISSN, Scopus quartile, Web of Science indexing, and 0 INR fee route. State all empirical risks (median turnaround, desk rejection odds, scope caveats) with complete transparency.
+4. **Pillar 4 (Prior Rejection Remediation Audit):** Build a point by point reconciliation table proving that 100 percent of historical rejection critiques from prior journals or conferences are physically resolved on disk with cited file proof.
+`,
+  "astryx": `---
+name: astryx
+description: Meta Astryx design system and UI library for React 19 apps using StyleX styling, accessible primitives, modular themes, and CLI templates.
+---
+
+> [!IMPORTANT]
+> **MANDATORY ZERO CAPABILITY LOSS GATE**: This root \`SKILL.md\` is the routing index preventing system prompt bloat. Before taking action, call \`view_file\` on \`WORKFLOW.md\` so the complete Astryx design system implementation guide is loaded into context.
+
+# Astryx Design System Router
+
+Astryx provides Meta's accessible UI components, theme engine, and atomic StyleX integration for React 19 web applications.
+
+| Resource | Purpose | Target Path |
+| :--- | :--- | :--- |
+| \`astryx-workflow\` | Complete quick start, setup, theming, StyleX, and component workflow | \`F:/Agent Skills/astryx/WORKFLOW.md\` |
+| \`cli-reference\` | Documentation assets and tree topics for tokens, themes, and templates | \`F:/Agent Skills/astryx/packages/cli/assets/docs/\` |
+| \`examples\` | Production reference applications for Next.js, Vite, StyleX, and Tailwind | \`F:/Agent Skills/astryx/apps/\` |
+`,
+  "unslop": `---
+name: unslop
+description: Anti slop craft router turning vibecoded AI UI into deliberate interfaces with quiet chrome, clear visual hierarchy, 4px grid rhythm, and bespoke character.
+---
+
+> [!IMPORTANT]
+> **MANDATORY ZERO CAPABILITY LOSS GATE**: This root \`SKILL.md\` is the routing index preventing system prompt bloat. Before taking action, call \`view_file\` on \`WORKFLOW.md\` so the complete nine pass redline craft workflow is loaded into context.
+
+# Unslop UI Anti Slop Craft Router
+
+Turn vibecoded AI interfaces into distinctive product designs. Every surface glow, arbitrary emoji, chaotic spacing, and shouting headline becomes deliberate craft.
+
+| Component | Purpose | Target Path |
+| :--- | :--- | :--- |
+| \`unslop-core\` | Nine pass redline pass covering spacing, color, icons, copy, type, layout, visuals | \`F:/Agent Skills/unslop/skills/unslop/WORKFLOW.md\` |
+| \`signs\` | Catalog of AI tells across gradients, borders, badges, and layout | \`F:/Agent Skills/unslop/skills/unslop/references/signs.md\` |
+| \`tokens\` | Concrete scale tokens for 4px grid, neutral ramps, typography, and depth | \`F:/Agent Skills/unslop/skills/unslop/references/tokens.md\` |
+| \`visuals\` | Craft guidance for hero moments, rendered objects, and charts | \`F:/Agent Skills/unslop/skills/unslop/references/visuals.md\` |
+| \`effects\` | Specialized code treatments including ASCII glyph rendering and textures | \`F:/Agent Skills/unslop/skills/unslop/references/effects.md\` |
 `,
 };
